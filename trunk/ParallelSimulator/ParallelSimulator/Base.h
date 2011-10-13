@@ -7,7 +7,6 @@
 
 #include <string>
 #include <sstream>
-#include "EventList.h"
 
 using namespace std;//omit this may cause TOSTRING function erronous
 
@@ -16,8 +15,6 @@ private:
 	int occupiedChannel;
 	bool reservedChannelOccupied; // added for the second scheme
 	int baseID;
-	EventList elist;
-	static Base * blist;
 public:
 	Base();
 	Base(int bid);
@@ -34,7 +31,5 @@ public:
 	bool isReservedChannelOccupied();
 
 	string toString();
-
-	static Base* getBlist();
 };
 #endif

@@ -1,8 +1,6 @@
 #include "Base.h"
 #include <iostream>
 
-Base * Base::blist = new Base[BASENO];
-
 Base::Base(){
 	baseID = 0;
 	occupiedChannel = 0;
@@ -60,8 +58,4 @@ string Base::toString(){
 	if(10 == baseID)
 	ss<<"baseID:"<<baseID<<"\toc:"<<occupiedChannel<<"\trco:"<<reservedChannelOccupied;
 	return ss.str();
-}
-
-Base * Base::getBlist(){
-	return blist;
 }
