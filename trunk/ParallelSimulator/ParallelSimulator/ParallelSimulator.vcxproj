@@ -87,10 +87,22 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Base.h" />
+    <ClInclude Include="CallHandoverEvent.h" />
+    <ClInclude Include="CallInitiationEvent.h" />
+    <ClInclude Include="CallTerminationEvent.h" />
+    <ClInclude Include="Event.h" />
+    <ClInclude Include="EventList.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Base.cpp" />
+    <ClCompile Include="CallHandoverEvent.cpp" />
+    <ClCompile Include="CallInitiationEvent.cpp" />
+    <ClCompile Include="CallTerminiationEvent.cpp" />
+    <ClCompile Include="Event.cpp" />
+    <ClCompile Include="EventList.cpp" />
     <ClCompile Include="ParallelSimulator.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="test1.cpp" />

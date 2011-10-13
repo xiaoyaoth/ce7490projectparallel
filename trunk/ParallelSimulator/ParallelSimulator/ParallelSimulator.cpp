@@ -51,6 +51,7 @@ void main(int argc, char* argv[])
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+	cout<<numprocs<<endl;
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
 	MPI_Type_extent(MPI_INT, &intex);
@@ -76,7 +77,8 @@ void main(int argc, char* argv[])
 	}else if(myrank == 1){
 		MPI_Recv(&e1, 1, handoverType, 0, 99, MPI_COMM_WORLD, &status);
 		cout<<e1.ano<<" "<<e1.dura<<" "<<e1.pos<<" "<<e1.rc<<" "<<e1.speed<<" "<<e1.time;
-		cout<<msg;
+		//cout<<msg;
 	}
+	MPI_Type_free(&handoverType);
 	MPI_Finalize();
 }
