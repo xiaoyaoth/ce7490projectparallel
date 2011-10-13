@@ -11,6 +11,12 @@ CallTerminationEvent::CallTerminationEvent(float t, float pos, int ano, bool rc)
 {
 	prevCallReserved = rc;
 }
+
+CallTerminationEvent::CallTerminationEvent(eventStruct e)
+	:Event(e.time, e.pos, e.ano)
+{
+	prevCallReserved = e.rc;
+}
 /*
 
 void CallTerminationEvent::handleEvent(Base blist[]){

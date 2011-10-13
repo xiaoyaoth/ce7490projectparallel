@@ -36,10 +36,10 @@
     <ClInclude Include="Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EventList.h">
+    <ClInclude Include="Base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Base.h">
+    <ClInclude Include="Process.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -68,7 +68,7 @@
     <ClCompile Include="Event.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EventList.cpp">
+    <ClCompile Include="Process.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

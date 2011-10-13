@@ -70,9 +70,9 @@ struct eventStruct{
 	float pos;
 
 	void toString(){
-		cout<<etype<<" "<<ano<<" "<<dura
-			<<" "<<pos<<" "<<rc<<" "<<speed
-			<<" "<<time<<endl;
+		cout<<"type:"<<etype<<"\tano:"<<ano<<"\tdura:"<<dura
+			<<"\tbid:"<<getBaseID()<<"\trc:"<<rc<<"\tspeed:"<<speed
+			<<"\ttime:"<<time<<endl;
 	}
 
 	int getBaseID(){
