@@ -8,7 +8,6 @@
 #include <string>
 #include <sstream>
 #include "EventList.h"
-#include "Event.h"
 
 using namespace std;//omit this may cause TOSTRING function erronous
 
@@ -33,9 +32,6 @@ public:
 	void initializeReservation();
 	void toggleReservation();
 	bool isReservedChannelOccupied();
-
-	void insert(Event * e);
-	Event * getNextEvent();
 
 	string toString();
 

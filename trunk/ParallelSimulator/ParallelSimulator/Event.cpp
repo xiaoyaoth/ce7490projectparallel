@@ -35,6 +35,7 @@ Event * Event::getNextEventPtr(){
 	return nextEvent;
 }
 
+/*
 void Event::handleEvent(Base blist[]){
 	std::cout<<"general func of handling event"<<std::endl;
 }
@@ -44,6 +45,7 @@ string Event::getOutput(Base blist[]){
 	ss<<"vitual"<<"\t"<<time<<"\t"<<blist[baseID].toString()<<std::endl;
 	return ss.str();
 }
+*/
 
 string Event::getResult(){
 	stringstream ss;

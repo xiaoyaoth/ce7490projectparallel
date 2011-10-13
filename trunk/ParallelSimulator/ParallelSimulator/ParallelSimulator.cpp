@@ -10,123 +10,94 @@
 #include <iostream>
 #include <fstream>
 
+#include "Base.h"
+#include "Event.h"
+#include "EventList.h"
+#include "CallHandoverEvent.h"
+#include "CallInitiationEvent.h"
+#include "CallTerminationEvent.h"
+
 using namespace Concurrency;
 using namespace std;
 
-struct initEventStruct{
-	int ano;
-	float time;
-	float speed;
-	float dura;
-	float pos;
-};
-
-struct handoverEventStruct{
+struct eventStruct{
+	int etype;//event type, 0 is initial, 1 is handover, 2 is termination
 	int ano;
 	int rc;
 	float time;
 	float speed;
 	float dura;
 	float pos;
+
+	void toString(){
+		cout<<etype<<" "<<ano<<" "<<dura
+			<<" "<<pos<<" "<<rc<<" "<<speed
+			<<" "<<time<<endl;
+	}
 };
 
-struct termiEventStruct{
-	int ano;
-	int rc;
-	float time;
-	float pos;
-};
-
-void initializeEnv(MPI_Datatype &init, MPI_Datatype &hando, MPI_Datatype &termi);
+void initializeEnv(MPI_Datatype &t);
 
 void main(int argc, char* argv[]){
 	int procsAmount, myRank;
 	MPI_Status status;
-	MPI_Datatype initType, handoType, termiType;
+	MPI_Datatype mpiType;
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &procsAmount);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
-	
-	initializeEnv(initType, handoType, termiType);
-}
+	initializeEnv(mpiType);
 
-void initializeEnv(
-	MPI_Datatype &it, //MPI Initiate type
-	MPI_Datatype &ht, //MPI handover type
-	MPI_Datatype &tt //MPI termination type
-	)
-{
-	int blocklen[2] = {2,4};
-	MPI_Datatype types[2]={MPI_INT, MPI_FLOAT};
-	
-	MPI_Aint iDisp[2];
-	MPI_Aint hDisp[2];
-	MPI_Aint tDisp[2];//A probably means address, this shows the address of the 
-	
-	MPI_Aint intex; //A probably means address, this shows the displament in the array
-	MPI_Type_extent(MPI_INT, &intex);
-	
-	iDisp[0] = (MPI_Aint)0;
-	iDisp[1] = intex;
-
-	hDisp[0] = (MPI_Aint)0;
-	hDisp[1] = intex+intex;
-
-	tDisp[0] = (MPI_Aint)0;
-	tDisp[1] = intex+intex;
-
-	MPI_Type_struct(2, blocklen, iDisp, types, &it);
-	MPI_Type_commit(&it);
-	MPI_Type_struct(2, blocklen, hDisp, types, &ht);
-	MPI_Type_commit(&ht);
-	MPI_Type_struct(2, blocklen, tDisp, types, &tt);
-	MPI_Type_commit(&tt);
-
-	return;
-}
-
-void test(int argc, char* argv[]){
-	int numprocs, myrank, i, j, k;
-	MPI_Status status;
-	char msg[20];
-
-	int blocklen[2] = {2,4};
-	MPI_Datatype types[3]={MPI_INT, MPI_FLOAT};
-	MPI_Aint disp[2]; //A probably means address, this shows the address of the 
-	MPI_Datatype handoverType;
-	MPI_Aint intex; //A probably means address, this shows the displament in the array
-
-	MPI_Init(&argc, &argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
-	cout<<numprocs<<endl;
-	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-
-	MPI_Type_extent(MPI_INT, &intex);
-	disp[0] = (MPI_Aint)0;
-	disp[1] = intex+intex;
-
-	MPI_Type_struct(2, blocklen, disp, types, &handoverType);
-
-	MPI_Type_commit(&handoverType);
-	handoverEventStruct e1;
-	if(myrank == 0){
-		e1.ano = 0;
-		e1.dura = 123.456;
-		e1.pos = 23.45;
-		e1.rc = 0;
-		e1.speed = 99.88;
-		e1.time = 0.01;
-
-		MPI_Send(&e1, 1, handoverType, 1, 99, MPI_COMM_WORLD);
-		//strcpy(msg, "hello world");
-		//MPI_Send(msg, strlen(msg)+1, MPI_CHAR, 1, 99, MPI_COMM_WORLD);
-		cout<<myrank<<"hello"<<endl;
-	}else if(myrank == 1){
-		MPI_Recv(&e1, 1, handoverType, 0, 99, MPI_COMM_WORLD, &status);
-		cout<<e1.ano<<" "<<e1.dura<<" "<<e1.pos<<" "<<e1.rc<<" "<<e1.speed<<" "<<e1.time;
-		//cout<<msg;
+	int size = BASENO/procsAmount+1;
+	Base *blist = new Base[size];
+	for(int i = 0; i<size; i++){
+		int bid = i*procsAmount + myRank;
+		if(bid<20)
+			blist[i].setBaseID(bid);
+		else
+			blist[i].setBaseID(-1);
+		cout<<blist[i].getBaseID()<<endl;
 	}
-	MPI_Type_free(&handoverType);
+
+	if(myRank == 0){
+		eventStruct e;
+		MPI_Recv(&e, 1, mpiType, MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &status);
+		e.toString();
+		MPI_Recv(&e, 1, mpiType, MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &status);
+		e.toString();
+		MPI_Recv(&e, 1, mpiType, MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &status);
+		e.toString();
+	}else if(myRank == 1){
+		eventStruct e1;
+		e1.etype = 0; e1.ano = 0; e1.dura = 0; e1.pos = 0; e1.speed = 0; e1.time = 0;
+		MPI_Send(&e1, 1, mpiType, 0, 99, MPI_COMM_WORLD);
+	}
+	else if(myRank == 2){
+		eventStruct e2;
+		e2.etype = 1; e2.ano = 1; e2.dura = 1; e2.pos = 1; e2.speed = 1; e2.time = 1; e2.rc = 1;
+		MPI_Send(&e2, 1, mpiType, 0, 99, MPI_COMM_WORLD);
+	}
+	else if(myRank == 3){
+		eventStruct e3;
+		e3.etype = 2; e3.ano = 2; e3.pos = 2; e3.time = 2; e3.rc = 2;
+		MPI_Send(&e3, 1, mpiType, 0, 99, MPI_COMM_WORLD);
+	}
+	MPI_Type_free(&mpiType);
 	MPI_Finalize();
+}
+
+void initializeEnv(MPI_Datatype &t)
+{
+	int blocklen[2] = {3,4};
+	MPI_Datatype types[2]={MPI_INT, MPI_FLOAT};
+	MPI_Aint disp[2];//A probably means address, this shows the address of the 
+	MPI_Aint intex; //A probably means address, this shows the displament in the array
+	MPI_Type_extent(MPI_INT, &intex);
+
+	disp[0] = (MPI_Aint)0;
+	disp[1] = intex+intex+intex;
+
+	MPI_Type_struct(2, blocklen, disp, types, &t);
+	MPI_Type_commit(&t);
+	return;
 }

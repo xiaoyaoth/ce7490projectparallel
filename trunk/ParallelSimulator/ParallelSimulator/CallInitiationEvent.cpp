@@ -7,7 +7,7 @@ CallInitiationEvent::CallInitiationEvent(float t, float s, int bid, float p, flo
 	position = p;
 	duration = d;
 }
-
+/*
 void CallInitiationEvent::handleEvent(Base blist[]){
 	if(SCHEME == 0)
 		scheme0(blist);
@@ -71,4 +71,4 @@ string CallInitiationEvent::getOutput(Base blist[]){
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();
-}
+}*/

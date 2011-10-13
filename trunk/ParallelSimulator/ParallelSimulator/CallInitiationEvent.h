@@ -14,9 +14,9 @@ private:
 	float position;
 public:
 	CallInitiationEvent(float time, float speed, int BaseID, float position, float duration, int no);
-	void handleEvent(Base blist[]);
-	void scheme0(Base blist[]);
-	void scheme1(Base blist[]);
-	string getOutput(Base blist[]);
+	//void handleEvent(Base blist[]);
+	//void scheme0(Base blist[]);
+	//void scheme1(Base blist[]);
+	//string getOutput(Base blist[]);
 };
 #endif

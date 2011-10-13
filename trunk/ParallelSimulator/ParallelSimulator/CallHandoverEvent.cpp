@@ -7,7 +7,7 @@ CallHandoverEvent::CallHandoverEvent(float t, float s, int bid, float d, int ano
 	duration = d;
 	prevCallReserved = false;
 }
-
+/*
 CallHandoverEvent::CallHandoverEvent(float t, float s, int bid, float d, int ano, bool rc)
 	:Event(t, bid, ano)
 {
@@ -86,3 +86,4 @@ string CallHandoverEvent::getOutput(Base blist[]){
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();
 }
+*/

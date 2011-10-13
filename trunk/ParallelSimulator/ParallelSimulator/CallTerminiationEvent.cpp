@@ -11,6 +11,7 @@ CallTerminationEvent::CallTerminationEvent(float t, int bid, int ano, bool rc)
 {
 	prevCallReserved = rc;
 }
+/*
 
 void CallTerminationEvent::handleEvent(Base blist[]){
 	if(SCHEME == 0)
@@ -46,4 +47,4 @@ string CallTerminationEvent::getOutput(Base blist[]){
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();
-}
+}*/
