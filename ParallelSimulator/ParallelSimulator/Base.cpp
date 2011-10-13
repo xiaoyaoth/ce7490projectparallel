@@ -55,14 +55,6 @@ bool Base::isReservedChannelOccupied(){
 	return reservedChannelOccupied;
 }
 
-void Base::insert(Event * e){
-	elist.insert(e);
-}
-
-Event * Base::getNextEvent(){
-	return elist.getNextEvent();
-}
-
 string Base::toString(){
 	stringstream ss;
 	if(10 == baseID)

@@ -15,10 +15,10 @@ class EventList
 private:
 	priority_queue<Event*, vector<Event*>, comp> queue;
 public:
-	EventList(Event * e);
 	EventList();
+	EventList(Event * e);
 	void insert(Event * e);
-	Event * getNextEvent();
+	Event* getNextEvent();
 };
 
 #endif;

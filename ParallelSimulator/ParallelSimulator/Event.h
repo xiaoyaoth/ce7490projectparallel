@@ -19,7 +19,7 @@
 
 #include <iostream>
 #include <sstream>
-#include "Base.h"
+//#include "Base.h"
 
 using namespace std;
 
@@ -53,8 +53,8 @@ public:
 	int getEventID();
 	int getArrivalNo();
 
-	virtual void handleEvent(Base blist[]);
-	virtual string getOutput(Base blist[]);
+	//virtual void handleEvent(Base blist[]);
+	//virtual string getOutput(Base blist[]);
 
 	static string getResult();
 };

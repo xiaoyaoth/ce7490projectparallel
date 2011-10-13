@@ -2,8 +2,13 @@
 #include <iostream>
 #include <queue>
 
+EventList::EventList(){
+	queue.empty();
+}
+
 EventList::EventList(Event *e){
 	queue.empty();
+	queue.push(e);
 }
 
 void EventList::insert(Event * e){
