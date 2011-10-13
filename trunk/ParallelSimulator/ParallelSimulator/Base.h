@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include "EventList.h"
+#include "Event.h"
 
 using namespace std;//omit this may cause TOSTRING function erronous
 
@@ -21,14 +22,21 @@ private:
 public:
 	Base();
 	Base(int bid);
-	int getOccupiedChannel();
+
 	int getBaseID();
 	void setBaseID(int bid);
+
+	int getOccupiedChannel();
 	void incOccupiedChannel();
 	void decOccupiedChannel();
+
 	void initializeReservation();
 	void toggleReservation();
 	bool isReservedChannelOccupied();
+
+	void insert(Event * e);
+	Event * getNextEvent();
+
 	string toString();
 
 	static Base* getBlist();

@@ -15,16 +15,17 @@ Base::Base(int bid){
 	reservedChannelOccupied = false;
 }
 
-int Base::getOccupiedChannel(){
-	return occupiedChannel;
-}
-
 int Base::getBaseID(){
 	return baseID;
 }
 
 void Base::setBaseID(int bid){
 	baseID = bid;
+}
+
+
+int Base::getOccupiedChannel(){
+	return occupiedChannel;
 }
 
 void Base::incOccupiedChannel(){
@@ -52,6 +53,14 @@ void Base::toggleReservation(){
 
 bool Base::isReservedChannelOccupied(){
 	return reservedChannelOccupied;
+}
+
+void Base::insert(Event * e){
+	elist.insert(e);
+}
+
+Event * Base::getNextEvent(){
+	return elist.getNextEvent();
 }
 
 string Base::toString(){

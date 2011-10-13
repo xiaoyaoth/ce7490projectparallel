@@ -37,8 +37,56 @@ struct termiEventStruct{
 	float pos;
 };
 
-void main(int argc, char* argv[])
+void initializeEnv(MPI_Datatype &init, MPI_Datatype &hando, MPI_Datatype &termi);
+
+void main(int argc, char* argv[]){
+	int procsAmount, myRank;
+	MPI_Status status;
+	MPI_Datatype initType, handoType, termiType;
+
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &procsAmount);
+	MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+	
+	initializeEnv(initType, handoType, termiType);
+}
+
+void initializeEnv(
+	MPI_Datatype &it, //MPI Initiate type
+	MPI_Datatype &ht, //MPI handover type
+	MPI_Datatype &tt //MPI termination type
+	)
 {
+	int blocklen[2] = {2,4};
+	MPI_Datatype types[2]={MPI_INT, MPI_FLOAT};
+	
+	MPI_Aint iDisp[2];
+	MPI_Aint hDisp[2];
+	MPI_Aint tDisp[2];//A probably means address, this shows the address of the 
+	
+	MPI_Aint intex; //A probably means address, this shows the displament in the array
+	MPI_Type_extent(MPI_INT, &intex);
+	
+	iDisp[0] = (MPI_Aint)0;
+	iDisp[1] = intex;
+
+	hDisp[0] = (MPI_Aint)0;
+	hDisp[1] = intex+intex;
+
+	tDisp[0] = (MPI_Aint)0;
+	tDisp[1] = intex+intex;
+
+	MPI_Type_struct(2, blocklen, iDisp, types, &it);
+	MPI_Type_commit(&it);
+	MPI_Type_struct(2, blocklen, hDisp, types, &ht);
+	MPI_Type_commit(&ht);
+	MPI_Type_struct(2, blocklen, tDisp, types, &tt);
+	MPI_Type_commit(&tt);
+
+	return;
+}
+
+void test(int argc, char* argv[]){
 	int numprocs, myrank, i, j, k;
 	MPI_Status status;
 	char msg[20];
