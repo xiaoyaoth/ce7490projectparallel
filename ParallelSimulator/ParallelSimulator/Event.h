@@ -29,7 +29,7 @@ protected:
 
 	/*Event attribute*/
 	float time;
-	int baseID;
+	float position;
 	int arrivalNo;
 	Event * nextEvent;
 	//int eid;
@@ -45,7 +45,7 @@ protected:
 public:
 
 	Event();
-	Event(float time, int baseID, int ano);
+	Event(float time, float pos, int ano);
 	float getTime();
 	int getBaseID();
 	Event * getNextEventPtr();
@@ -58,4 +58,26 @@ public:
 
 	static string getResult();
 };
+
+
+struct eventStruct{
+	int etype;//event type, 0 is initial, 1 is handover, 2 is termination
+	int ano;
+	int rc;
+	float time;
+	float speed;
+	float dura;
+	float pos;
+
+	void toString(){
+		cout<<etype<<" "<<ano<<" "<<dura
+			<<" "<<pos<<" "<<rc<<" "<<speed
+			<<" "<<time<<endl;
+	}
+
+	int getBaseID(){
+		return pos/2;
+	}
+};
+
 #endif

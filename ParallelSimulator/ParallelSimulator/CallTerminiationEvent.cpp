@@ -1,13 +1,13 @@
 #include "CallTerminationEvent.h"
 
-CallTerminationEvent::CallTerminationEvent(float t, int bid, int ano)
-	:Event(t, bid, ano)
+CallTerminationEvent::CallTerminationEvent(float t, float pos, int ano)
+	:Event(t, pos, ano)
 {
 	prevCallReserved = false;
 }
 
-CallTerminationEvent::CallTerminationEvent(float t, int bid, int ano, bool rc)
-	:Event(t, bid, ano)
+CallTerminationEvent::CallTerminationEvent(float t, float pos, int ano, bool rc)
+	:Event(t, pos, ano)
 {
 	prevCallReserved = rc;
 }

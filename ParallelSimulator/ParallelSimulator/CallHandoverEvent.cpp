@@ -1,14 +1,15 @@
 #include "CallHandoverEvent.h"
 
-CallHandoverEvent::CallHandoverEvent(float t, float s, int bid, float d, int ano)
-	:Event(t, bid, ano)
+CallHandoverEvent::CallHandoverEvent(float t, float s, float pos, float d, int ano)
+	:Event(t, pos, ano)
 {
 	speed = s;
 	duration = d;
 	prevCallReserved = false;
 }
-/*
-CallHandoverEvent::CallHandoverEvent(float t, float s, int bid, float d, int ano, bool rc)
+
+
+CallHandoverEvent::CallHandoverEvent(float t, float s, float bid, float d, int ano, bool rc)
 	:Event(t, bid, ano)
 {
 	speed = s;
@@ -16,6 +17,7 @@ CallHandoverEvent::CallHandoverEvent(float t, float s, int bid, float d, int ano
 	prevCallReserved = rc;
 }
 
+/*
 void CallHandoverEvent::handleEvent(Base blist[]){
 	if(SCHEME == 0)
 		scheme0(blist);

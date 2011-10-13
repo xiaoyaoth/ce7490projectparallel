@@ -8,9 +8,9 @@ int Event::block = 0;
 
 int Event::counter = 0;
 
-Event::Event(float t, int bid, int ano){
+Event::Event(float t, float pos, int ano){
 	time = t;
-	baseID = bid;
+	position = pos;
 	arrivalNo = ano;
 	nextEvent = NULL;
 	Event::total++;
@@ -24,7 +24,7 @@ float Event::getTime(){
 }
 
 int Event::getBaseID(){
-	return baseID;
+	return (int)position/2;
 }
 
 void Event::setNextEventPtr(Event * e){

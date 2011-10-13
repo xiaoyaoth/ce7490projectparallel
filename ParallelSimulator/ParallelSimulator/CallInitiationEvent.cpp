@@ -1,7 +1,7 @@
 #include "CallInitiationEvent.h"
 
-CallInitiationEvent::CallInitiationEvent(float t, float s, int bid, float p, float d, int no)
-	:Event(t, bid, no)
+CallInitiationEvent::CallInitiationEvent(float t, float s, float p, float d, int no)
+	:Event(t, pos, no)
 {
 	speed = s;
 	position = p;
