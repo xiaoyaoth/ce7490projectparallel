@@ -1,11 +1,17 @@
 #include "CallInitiationEvent.h"
 
 CallInitiationEvent::CallInitiationEvent(float t, float s, float p, float d, int no)
-	:Event(t, pos, no)
+	:Event(t, p, no)
 {
 	speed = s;
-	position = p;
 	duration = d;
+}
+
+CallInitiationEvent::CallInitiationEvent(eventStruct e)
+	:Event(e.time, e.pos, e.ano)
+{
+	speed = e.speed;
+	duration = e.dura;
 }
 /*
 void CallInitiationEvent::handleEvent(Base blist[]){

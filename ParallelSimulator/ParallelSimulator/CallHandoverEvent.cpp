@@ -9,12 +9,20 @@ CallHandoverEvent::CallHandoverEvent(float t, float s, float pos, float d, int a
 }
 
 
-CallHandoverEvent::CallHandoverEvent(float t, float s, float bid, float d, int ano, bool rc)
-	:Event(t, bid, ano)
+CallHandoverEvent::CallHandoverEvent(float t, float s, float pos, float d, int ano, bool rc)
+	:Event(t, pos, ano)
 {
 	speed = s;
 	duration = d;
 	prevCallReserved = rc;
+}
+
+CallHandoverEvent::CallHandoverEvent(eventStruct e)
+	:Event(e.time, e.pos, e.ano)
+{
+	speed = e.speed;
+	duration = e.dura;
+	prevCallReserved = e.rc;
 }
 
 /*
