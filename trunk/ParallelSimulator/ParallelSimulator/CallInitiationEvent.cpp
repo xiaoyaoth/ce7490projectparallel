@@ -68,11 +68,13 @@ void CallInitiationEvent::scheme1(Base blist[]){
 */
 string CallInitiationEvent::toString(){
 	stringstream ss;
-	//ss<<this->getEventID()<<"\t"<<"Init\t"<<arrivalNo<<"\t"<<time<<"\t"
-	//	<<baseID<<"\t"<<speed<<"\t"<<duration<<"\t"<<position<<std::endl;
 	int baseID = position/DIAMETER;
-	ss<<"i"<<"\t"<<time
-		<<"\t"<<arrivalNo<<"\t";
+
+	ss<<"ano:"<<arrivalNo<<"\tInit\t"<<arrivalNo<<"\t"<<time<<"\t"
+		<<baseID<<"\t"<<speed<<"\t"<<duration<<"\t"<<position;
+	
+	//ss<<"i"<<"\t"<<time
+		//<<"\t"<<arrivalNo<<"\t";
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();

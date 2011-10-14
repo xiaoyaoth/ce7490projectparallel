@@ -46,10 +46,11 @@ void CallTerminationEvent::scheme1(Base blist[]){
 
 string CallTerminationEvent::toString(){
 	stringstream ss;
-	//ss<<this->getEventID()<<"\t"<<"Termi\t\t"<<time<<"\t"<<baseID<<std::endl;
 	int baseID = position/DIAMETER;
-	ss<<"t "<<prevCallReserved<<"\t"<<time
-		<<"\t"<<arrivalNo<<"\t";
+	ss<<"ano:"<<arrivalNo<<"Termi\t\t"<<time<<"\t"<<baseID;
+	
+	//ss<<"t "<<prevCallReserved<<"\t"<<time
+		//<<"\t"<<arrivalNo<<"\t";
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();

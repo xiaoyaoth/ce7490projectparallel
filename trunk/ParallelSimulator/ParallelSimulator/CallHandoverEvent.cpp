@@ -86,11 +86,13 @@ void CallHandoverEvent::scheme1(Base * blist){
 */
 string CallHandoverEvent::toString(){
 	stringstream ss;
-	//ss<<this->getEventID()<<"\t"<<"Hando\t\t"<<time
-	//	<<"\t"<<baseID<<"\t"<<speed<<"\t"<<duration<<std::endl;
 	int baseID = position/DIAMETER;
-	ss<<"h "<<this->prevCallReserved<<"\t"<<time
-		<<"\t"<<arrivalNo<<"\t";
+
+	ss<<"ano:"<<arrivalNo<<"Hando\t\t"<<time
+		<<"\t"<<baseID<<"\t"<<speed<<"\t"<<duration;
+	
+	//ss<<"h "<<this->prevCallReserved<<"\t"<<time
+		//<<"\t"<<arrivalNo<<"\t";
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();

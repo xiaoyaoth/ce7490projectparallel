@@ -18,6 +18,7 @@ private:
 	int pid;
 	int baseAmount;
 	int eventAmount;
+	int procAmount;
 
 	MPI_Datatype mpiType;
 
@@ -36,7 +37,7 @@ public:
 
 	/*MPI operation*/
 	void sendEvent(eventStruct e, int dest);
-	int receiveEvent(MPI_Request &req);
+	int receiveEvent(MPI_Request *req, int *flag);
 };
 
 #endif;
