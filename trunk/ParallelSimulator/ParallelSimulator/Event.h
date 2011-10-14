@@ -5,21 +5,17 @@
 #define NULL 0
 #endif
 
-#ifndef DIAMETER
 #define DIAMETER 2
-#endif
-
-#ifndef POS
-#define POS 1
-#endif
-
-#ifndef SCHEME
 #define SCHEME 1
-#endif
+
+#define INIT 0
+#define HANDO 1
+#define TERMI 2
+#define FINI 3
 
 #include <iostream>
 #include <sstream>
-//#include "Base.h"
+#include "Base.h"
 
 using namespace std;
 
@@ -54,8 +50,7 @@ public:
 	int getArrivalNo();
 
 	//virtual void handleEvent(Base blist[]);
-	//virtual string getOutput(Base blist[]);
-
+	virtual string toString();
 	static string getResult();
 };
 
@@ -76,7 +71,7 @@ struct eventStruct{
 	}
 
 	int getBaseID(){
-		return pos/2;
+		return pos/DIAMETER;
 	}
 };
 

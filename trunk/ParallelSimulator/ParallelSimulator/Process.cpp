@@ -37,50 +37,82 @@ Event * Process::getNextEvent(){
 	return queue.top();
 }
 
+int Process::getQueueSize(){
+	return queue.size();
+}
+
 void Process::run(){
 	MPI_Request req;
+	string rec; //one record
+	eventStruct e;
 	int i = 0;
+	bool loop = true;
 	if(pid == 0){
 		ifstream fin;
 		fin.open("C:\\Users\\xli15\\Documents\\Visual Studio 2010\\Projects\\ParallelSimulator\\ParallelSimulator\\data.txt");
 		ofstream fout("out.txt");
 		if(!fin)
 			cout<<"file not exist"<<endl;
-		string rec; //one record
-		eventStruct e;
-		while(!fin.eof() && ++i<10){
-			getline(fin, rec);
-			e =  parseData(rec);
-			if(e.getBaseID()<baseAmount){
-				this->insert(new CallInitiationEvent(e));
-				e.toString();
+		while(loop){
+			if((!fin.eof() || queue.size() != 0) && ++i<10 ){
+				getline(fin, rec);
+				e =  parseData(rec);
+				if(e.getBaseID()<baseAmount){
+					this->insert(new CallInitiationEvent(e));
+					//e.toString();
+				}
+				else{
+					int dest = e.getBaseID()/baseAmount;
+					sendEvent(e, dest);
+				}
+				if(queue.size() != 0){
+					Event * cur = getNextEvent();
+					cout<<cur->toString()<<endl;
+				}
+			} else{
+				e.etype = FINI;
+				sendEvent(e, pid+1);
+				loop = false;
 			}
-			else
-				sendEvent(e);
 		}
-	}else
-		while(true)
-			receiveEvent(req);
+	}else{
+		while(loop || queue.size()>0){
+			int stat = receiveEvent(req);
+			if(stat == FINI){
+				e.etype = FINI;
+				sendEvent(e, pid+1);
+				loop = false;
+			}
+			Event * cur = getNextEvent();
+			cout<<cur->toString()<<endl;
+		}
+	}
+	cout<<"finish run"<<endl;
 }
 
-void Process::sendEvent(eventStruct e){
-	int destPid = e.getBaseID()/baseAmount;
-	MPI_Send(&e, 1, mpiType, destPid, 99, MPI_COMM_WORLD);
+void Process::sendEvent(eventStruct e, int dest){
+	MPI_Send(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD);
 }
 
-void Process::receiveEvent(MPI_Request &req){
+int Process::receiveEvent(MPI_Request &req){
 	MPI_Status status;
+	int flag;
 	eventStruct e;
 	MPI_Irecv(&e, 1, mpiType, MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &req);
-	MPI_Wait(&req, &status);
-	if(e.etype == 1)
-		this->insert(new CallHandoverEvent(e));
-	else if(e.etype = 0)
-		this->insert(new CallInitiationEvent(e));
-	else
-		this->insert(new CallTerminationEvent(e));
-	e.toString();
-	cout<<"finish"<<endl; 
+	MPI_Test(&req, &flag, &status);
+	if(flag == true){
+		if(e.etype == FINI)
+			return FINI;
+		else if(e.etype == HANDO)
+			this->insert(new CallHandoverEvent(e));
+		else if(e.etype == INIT)
+			this->insert(new CallInitiationEvent(e));
+		else if(e.etype == TERMI)
+			this->insert(new CallTerminationEvent(e));
+		return 0;
+	}else 
+		cout<<"read fail"<<endl; 
+	return 0;
 	//how to confirm if the simulation finish running? because you don't know by when you will not receive any message
 	//and another thing, if receive is blocked, the following stuff cannot be done? if multi-thread not escapable?
 }

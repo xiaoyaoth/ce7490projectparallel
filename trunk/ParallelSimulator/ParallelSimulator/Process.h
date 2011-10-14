@@ -23,12 +23,20 @@ private:
 
 	priority_queue<Event*, vector<Event*>, comp> queue;
 public:
+	/*initiation*/
 	Process(int procAmount, int myRank, MPI_Datatype t);
+
+	/*queue operation*/
 	void insert(Event * e);
 	Event* getNextEvent();
+	int getQueueSize();
+
+	/*main logic for each process*/
 	void run();
-	void sendEvent(eventStruct e);
-	void receiveEvent(MPI_Request &req);
+
+	/*MPI operation*/
+	void sendEvent(eventStruct e, int dest);
+	int receiveEvent(MPI_Request &req);
 };
 
 #endif;
