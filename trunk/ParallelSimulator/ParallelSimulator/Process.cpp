@@ -48,6 +48,7 @@ int Process::getQueueSize(){
 void Process::run(){
 	MPI_Request req;
 	int flag = true;
+	int stat;
 	string rec; //one record
 	eventStruct e;
 	ifstream fin;
@@ -75,10 +76,13 @@ void Process::run(){
 				sendEvent(e, dest);
 			}
 		}
-		int stat = receiveEvent(&req, &flag);
-		if(stat == FINI)
+		stat = receiveEvent(&req, &flag);
+		if(stat == FINI){
+			cout<<"stat = FINI"<<endl;
 			prevFini = true;
-		if(prevFini = true && queue.size() == 0){
+		}
+		if(prevFini == true && queue.size() == 0){
+			cout<<"prevFini = true && queue.size() == 0"<<endl;
 			fini = true;
 			e.etype = FINI;
 			sendEvent(e, pid+1);
@@ -102,7 +106,7 @@ int Process::receiveEvent(MPI_Request *req,	int *flag){
 	eventStruct e;
 	if(*flag == true)
 		MPI_Irecv(&e, 1, mpiType, MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, req);
-	MPI_Test(req, flag, &status);
+	MPI_Test(req, flag, &status); // through debugging I found when this line is past, it directly went to finalize
 	if(*flag == true){
 		if(e.etype == FINI)
 			return FINI;
