@@ -22,7 +22,7 @@ CallHandoverEvent::CallHandoverEvent(eventStruct e)
 {
 	speed = e.speed;
 	duration = e.dura;
-	prevCallReserved = e.rc;
+	prevCallReserved = (bool)e.rc;
 }
 
 /*
@@ -86,7 +86,7 @@ void CallHandoverEvent::scheme1(Base * blist){
 */
 string CallHandoverEvent::toString(){
 	stringstream ss;
-	int baseID = position/DIAMETER;
+	int baseID = (int)position/DIAMETER;
 
 	ss<<"ano:"<<arrivalNo<<"Hando\t\t"<<time
 		<<"\t"<<baseID<<"\t"<<speed<<"\t"<<duration;

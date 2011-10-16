@@ -18,7 +18,6 @@ void initializeEnv(MPI_Datatype &t);
 
 void main(int argc, char* argv[]){
 	int procsAmount, myRank;
-	MPI_Status status;
 	MPI_Datatype mpiType;
 
 	MPI_Init(&argc, &argv);
@@ -27,7 +26,8 @@ void main(int argc, char* argv[]){
 	initializeEnv(mpiType);
 
 	Process p(procsAmount, myRank, mpiType);
-	p.run();
+	cout<<(1 == true);
+	//p.run();
 
 	MPI_Type_free(&mpiType);
 	MPI_Finalize();

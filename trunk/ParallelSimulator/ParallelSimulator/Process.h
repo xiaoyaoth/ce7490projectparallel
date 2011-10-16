@@ -15,16 +15,23 @@ struct comp{
 
 class Process{
 private:
+	/*logic*/
 	Base * blist;
 	int pid;
 	int baseAmount;
 	int eventAmount;
 	int procAmount;
-
-	MPI_Datatype mpiType;
-
 	priority_queue<Event*, vector<Event*>, comp> queue;
+	
+	/*MPI*/
+	MPI_Datatype mpiType;
+	MPI_Request sendReq;
+	MPI_Request recvReq;
+	int sendFlag;
+	int recvFlag;
+	bool ack;
 	list<struct eventStruct> sendList;
+
 public:
 	/*initiation*/
 	Process(int procAmount, int myRank, MPI_Datatype t);
@@ -36,11 +43,11 @@ public:
 
 	/*main logic for each process*/
 	void run();
+	struct eventStruct parseData(string rec);
 
 	/*MPI operation*/
-	void sendEvent();
-	int receiveEvent();
-	bool receiveACK();
+	void sendMessage();
+	int recvMessage();
 };
 
 #endif;

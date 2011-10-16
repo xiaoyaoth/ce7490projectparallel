@@ -6,17 +6,16 @@
 #include <string>
 
 using namespace std;
-struct eventStruct toHandoverStruct(int arrivalNo, float duration, float pos, bool prevCallReserved, float speed, float time);
-struct eventStruct toInitiationStruct(int arrivalNo, float duration, float pos, float speed, float time);
-struct eventStruct toTerminationStruct(int arrivalNo, float pos, bool prevCallReserved, float time);
-struct eventStruct parseData(string rec);
 
 Process::Process(int pno, int rank, MPI_Datatype t){
 	mpiType = t;
-	eventAmount = 0;
-	queue.empty();
+	sendFlag = 1;
+	recvFlag = 1;
+	ack = true;
 
+	/*logic*/
 	pid = rank;
+	eventAmount = 0;
 	procAmount = pno;
 	baseAmount = BASENO/procAmount+1;
 	blist = new Base[baseAmount];
@@ -28,6 +27,7 @@ Process::Process(int pno, int rank, MPI_Datatype t){
 			blist[i].setBaseID(-1);
 		cout<<blist[i].getBaseID()<<endl;
 	}
+	queue.empty();
 }
 
 void Process::insert(Event * e){
@@ -75,11 +75,10 @@ void Process::run(){
 			}
 			else{
 				sendList.push_back(e);
-
 			}
 		}
-		if(pid != 0)
-			stat = receiveEvent();
+		sendMessage();
+		//stat = receiveEvent();
 		if(stat == FINI){
 			cout<<"stat = FINI"<<endl;
 			prevFini = true;
@@ -88,7 +87,7 @@ void Process::run(){
 			cout<<"prevFini = true && queue.size() == 0"<<endl;
 			fini = true;
 			e.etype = FINI;
-			sendEvent(e, pid+1);
+			//sendEvent(e, pid+1);
 			break; // no event anymore, execution finished;
 		}
 		Event * cur = getNextEvent();
@@ -98,35 +97,27 @@ void Process::run(){
 	cout<<"finish run"<<endl;
 }
 
-void Process::sendEvent(){
-	MPI_Request req;
+/*Events are inserted into back, ACK are inserted into front, 
+  every pop operation is done from the front*/
+void Process::sendMessage(){
 	MPI_Status stat;
-	int flag = 0;
-	if(dest<procAmount){
-		MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &req);
-		MPI_Test(&req, &flag, &stat);
-		while(flag == false){
-			cout<<"send wait"<<endl;
-			MPI_Test(&req, &flag, &stat);
-		}
-	}
-	else
-		cout<<"no more proc"<<endl;
+	if(sendFlag == true && ack == true){
+		struct eventStruct e = sendList.front();
+		MPI_Isend(&e, 1, mpiType, e.dest, 99, MPI_COMM_WORLD, &sendReq);
+	} else if(sendFlag == false && ack == true){
+		MPI_Test(&sendReq, &sendFlag, &stat);
+	} else;// ACK is false
 }
 
-bool Process::receiveACK(){
-	MPI_Request
-}
-
-int Process::receiveEvent(){
-	MPI_Request req;
-	MPI_Status status;
+int Process::recvMessage(){
+	MPI_Status stat;
 	eventStruct e;
 
-	MPI_Irecv(&e, 1, mpiType, pid-1, 99, MPI_COMM_WORLD, &req);
-	MPI_Wait(&req, &status);
+	if(recvFlag == true)
+		MPI_Irecv(&e, 1, mpiType, pid-1, 99, MPI_COMM_WORLD, &recvReq);
+	else
+		MPI_Test(&req, &recvFlag, &stat);
 	e.toString();
-
 	if(e.etype == FINI)
 		return FINI;
 	else if(e.etype == HANDO)
@@ -138,43 +129,7 @@ int Process::receiveEvent(){
 	return 0;
 }
 
-struct eventStruct toHandoverStruct(int arrivalNo, float duration, float pos, bool prevCallReserved, float speed, float time){
-	eventStruct e;
-	e.ano = arrivalNo;
-	e.dura = duration;
-	e.etype = 1;
-	e.pos = pos;
-	e.rc = (int)prevCallReserved;
-	e.speed = speed;
-	e.time = time;
-	return e;
-}
-
-struct eventStruct toTerminationStruct(int arrivalNo, float pos, bool prevCallReserved, float time){
-	eventStruct e;
-	e.ano = arrivalNo;
-	e.dura = -1;
-	e.etype = 2;
-	e.pos = pos;
-	e.rc = prevCallReserved;
-	e.speed = -1;
-	e.time = time;
-	return e;
-}
-
-struct eventStruct toInitiationStruct(int arrivalNo, float duration, float pos, float speed, float time){
-	eventStruct e;
-	e.ano = arrivalNo;
-	e.dura = duration;
-	e.etype = 0;
-	e.pos = pos;
-	e.rc = 0;
-	e.speed = speed;
-	e.time = time;
-	return e;
-}
-
-struct eventStruct parseData(string rec){
+struct eventStruct Process::parseData(string rec){
 	char * cstr, *p;
 	int no, baseID;
 	float time, duration, speed, pos;
@@ -188,7 +143,7 @@ struct eventStruct parseData(string rec){
 	time = (float)atof(p);
 	p=strtok(NULL,"\t");
 	baseID = atoi(p) - 1;
-	pos = baseID*2 + 1;
+	pos = (float)baseID*2 + 1;
 	p=strtok(NULL,"\t");
 	duration = (float)atof(p);
 	p=strtok(NULL,"\t");
