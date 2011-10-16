@@ -11,7 +11,8 @@ Process::Process(int pno, int rank, MPI_Datatype t){
 	mpiType = t;
 	sendFlag = 1;
 	recvFlag = 1;
-	ack = true;
+	sendReq = MPI_REQUEST_NULL; // the default of MPI_Request is MPI_REQUEST_NULL
+	recvReq = MPI_REQUEST_NULL;
 
 	/*logic*/
 	pid = rank;
@@ -50,9 +51,9 @@ int Process::getQueueSize(){
 }
 
 void Process::run(){
-	int stat = 3;
+	int ret = 0; //received event type
 	string rec; //one record
-	eventStruct e;
+	struct eventStruct e;
 	ifstream fin;
 	ofstream fout("out.txt");
 
@@ -67,27 +68,31 @@ void Process::run(){
 	}
 
 	while(!fini){
-		if(pid == 0 && !fin.eof() && ++i<10){
+		if(pid == 0 && !fin.eof()){
 			getline(fin, rec);
 			e =  parseData(rec);
+			//cout<<e.ano<<" "<<e.getBaseID()/baseAmount<<" "
+				//<<e.getBaseID()<<" "<<baseAmount<<endl;
 			if(e.getBaseID()<baseAmount){
 				this->insert(new CallInitiationEvent(e));
 			}
 			else{
 				sendList.push_back(e);
 			}
-		}
+		} else
+			ret = FINI;
 		sendMessage();
-		//stat = receiveEvent();
-		if(stat == FINI){
-			cout<<"stat = FINI"<<endl;
+		if(pid != 0)
+			ret = recvMessage();
+		if(ret == FINI){
 			prevFini = true;
 		}
 		if(prevFini == true && queue.size() == 0){
-			cout<<"prevFini = true && queue.size() == 0"<<endl;
 			fini = true;
 			e.etype = FINI;
-			//sendEvent(e, pid+1);
+			sendList.push_back(e);
+			if(pid != procAmount -1)
+				sendMessage();
 			break; // no event anymore, execution finished;
 		}
 		Event * cur = getNextEvent();
@@ -97,36 +102,42 @@ void Process::run(){
 	cout<<"finish run"<<endl;
 }
 
-/*Events are inserted into back, ACK are inserted into front, 
-  every pop operation is done from the front*/
 void Process::sendMessage(){
 	MPI_Status stat;
-	if(sendFlag == true && ack == true){
+	if(sendFlag == true && sendList.size()>0){
 		struct eventStruct e = sendList.front();
-		MPI_Isend(&e, 1, mpiType, e.dest, 99, MPI_COMM_WORLD, &sendReq);
-	} else if(sendFlag == false && ack == true){
-		MPI_Test(&sendReq, &sendFlag, &stat);
-	} else;// ACK is false
+		sendList.pop_front();
+		int dest = -1;
+		if(e.etype == INIT)
+			dest = (int)e.getBaseID()/baseAmount;
+		else
+			dest = pid+1;
+		//cout<<"send ";
+		//e.toString();
+		MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
+	}
+	MPI_Test(&sendReq, &sendFlag, &stat);
 }
 
 int Process::recvMessage(){
 	MPI_Status stat;
-	eventStruct e;
-
-	if(recvFlag == true)
-		MPI_Irecv(&e, 1, mpiType, pid-1, 99, MPI_COMM_WORLD, &recvReq);
-	else
-		MPI_Test(&req, &recvFlag, &stat);
-	e.toString();
-	if(e.etype == FINI)
-		return FINI;
-	else if(e.etype == HANDO)
-		this->insert(new CallHandoverEvent(e));
-	else if(e.etype == INIT)
-		this->insert(new CallInitiationEvent(e));
-	else if(e.etype == TERMI)
-		this->insert(new CallTerminationEvent(e));
-	return 0;
+	if(recvFlag == true){
+		//cout<<"received ";
+		MPI_Irecv(&recvElem, 1, mpiType, MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &recvReq);
+	}
+	MPI_Test(&recvReq, &recvFlag, &stat);
+	if(recvFlag == true){
+		//recvElem.toString();
+		if(recvElem.etype == FINI)
+			return FINI;
+		else if(recvElem.etype == HANDO)
+			this->insert(new CallHandoverEvent(recvElem));
+		else if(recvElem.etype == INIT)
+			this->insert(new CallInitiationEvent(recvElem));
+		else if(recvElem.etype == TERMI)
+			this->insert(new CallTerminationEvent(recvElem));
+		return 0;
+	}
 }
 
 struct eventStruct Process::parseData(string rec){
@@ -149,9 +160,8 @@ struct eventStruct Process::parseData(string rec){
 	p=strtok(NULL,"\t");
 	speed = (float)atof(p);
 
-	eventStruct e;
+	struct eventStruct e;
 	e.etype = 0;
-	e.dest = e.getBaseID()/baseAmount;
 	e.ano = no;
 	e.dura = duration;
 	e.pos = pos;

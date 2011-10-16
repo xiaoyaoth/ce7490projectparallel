@@ -15,6 +15,7 @@ using namespace Concurrency;
 using namespace std;
 
 void initializeEnv(MPI_Datatype &t);
+void test(int rank);
 
 void main(int argc, char* argv[]){
 	int procsAmount, myRank;
@@ -26,8 +27,10 @@ void main(int argc, char* argv[]){
 	initializeEnv(mpiType);
 
 	Process p(procsAmount, myRank, mpiType);
-	cout<<(1 == true);
-	//p.run();
+
+	p.run();
+
+	//test(myRank);
 
 	MPI_Type_free(&mpiType);
 	MPI_Finalize();
@@ -47,5 +50,25 @@ void initializeEnv(MPI_Datatype &t)
 	MPI_Type_struct(2, blocklen, disp, types, &t);
 	MPI_Type_commit(&t);
 	return;
+}
+
+void test(int rank){
+	MPI_Status stat;
+	int i = 0;
+	int j = 1;
+	if(rank == 0){
+		cout<<rank<<endl;
+		i = 1999;
+		j = 2010;
+		MPI_Send(&i, 1, MPI_INT, 1, 99, MPI_COMM_WORLD);
+		MPI_Send(&j, 1, MPI_INT, 1, 99, MPI_COMM_WORLD);
+	} else if(rank == 1) {
+		cout<<rank<<endl;
+		cin>>i;
+		MPI_Recv(&i, 1, MPI_INT, 0, 99, MPI_COMM_WORLD, &stat);
+		cout<<"i:"<<i<<" j:"<<j<<endl;
+		MPI_Recv(&j, 1, MPI_INT, 0, 99, MPI_COMM_WORLD, &stat);
+		cout<<"i:"<<i<<" j:"<<j<<endl;
+	}
 }
 

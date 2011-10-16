@@ -29,8 +29,8 @@ private:
 	MPI_Request recvReq;
 	int sendFlag;
 	int recvFlag;
-	bool ack;
 	list<struct eventStruct> sendList;
+	struct eventStruct recvElem;
 
 public:
 	/*initiation*/

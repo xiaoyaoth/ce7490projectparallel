@@ -12,7 +12,6 @@
 #define HANDO 1
 #define TERMI 2
 #define FINI 3
-#define ACK 4
 
 #define INTNO 4
 #define FLOATNO 4
@@ -61,7 +60,6 @@ public:
 struct eventStruct{
 	/*parameter related MPI*/
 	int etype;//event type, 0 is initial, 1 is handover, 2 is termination
-	int dest;
 
 	/*parameter related logic*/
 	int ano;
