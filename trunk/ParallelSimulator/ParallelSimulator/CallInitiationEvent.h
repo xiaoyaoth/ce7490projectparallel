@@ -2,8 +2,6 @@
 #define CALLINITIATIONEVENT_H_
 
 #include "Event.h"
-#include "CallHandoverEvent.h"
-#include "CallTerminationEvent.h"
 
 class CallInitiationEvent : public Event
 {
@@ -13,9 +11,9 @@ private:
 public:
 	CallInitiationEvent(float time, float speed, float position, float duration, int no);
 	CallInitiationEvent(struct eventStruct e);
-	//void handleEvent(Base blist[]);
-	//void scheme0(Base blist[]);
-	//void scheme1(Base blist[]);
+	void handleEvent(Base blist[]);
+	void scheme0(Base blist[]);
+	void scheme1(Base blist[]);
 	string toString();
 };
 #endif
