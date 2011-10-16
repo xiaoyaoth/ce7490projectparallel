@@ -12,6 +12,7 @@
 #define HANDO 1
 #define TERMI 2
 #define FINI 3
+#define ACK 4
 
 #define INTNO 4
 #define FLOATNO 4
@@ -77,7 +78,7 @@ struct eventStruct{
 	}
 
 	int getBaseID(){
-		return pos/DIAMETER;
+		return (int)pos/DIAMETER;
 	}
 };
 

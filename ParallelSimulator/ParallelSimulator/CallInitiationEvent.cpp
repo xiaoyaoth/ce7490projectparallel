@@ -68,7 +68,7 @@ void CallInitiationEvent::scheme1(Base blist[]){
 */
 string CallInitiationEvent::toString(){
 	stringstream ss;
-	int baseID = position/DIAMETER;
+	int baseID = (int)position/DIAMETER;
 
 	ss<<"ano:"<<arrivalNo<<"\tInit\t"<<arrivalNo<<"\t"<<time<<"\t"
 		<<baseID<<"\t"<<speed<<"\t"<<duration<<"\t"<<position;
