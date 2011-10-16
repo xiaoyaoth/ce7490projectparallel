@@ -16,14 +16,13 @@ struct comp{
 class Process{
 private:
 	/*logic*/
-	Base * blist;
-	int pid;
-	int baseAmount;
-	int eventAmount;
-	int procAmount;
+	Base * blist;	
 	priority_queue<Event*, vector<Event*>, comp> queue;
-	
+
 	/*MPI*/
+	static int baseAmount; // base amount in every process
+	static int procAmount; // total process amounts
+	int pid;
 	MPI_Datatype mpiType;
 	MPI_Request sendReq;
 	MPI_Request recvReq;
@@ -48,6 +47,8 @@ public:
 	/*MPI operation*/
 	void sendMessage();
 	int recvMessage();
+	static int getBaseAmount();
+	static int getProcAmount();
 };
 
 #endif;

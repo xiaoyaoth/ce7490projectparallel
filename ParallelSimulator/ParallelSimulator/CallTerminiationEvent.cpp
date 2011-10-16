@@ -1,4 +1,5 @@
 #include "CallTerminationEvent.h"
+#include "Process.h"
 
 CallTerminationEvent::CallTerminationEvent(float t, float pos, int ano)
 	:Event(t, pos, ano)
@@ -17,7 +18,6 @@ CallTerminationEvent::CallTerminationEvent(struct eventStruct e)
 {
 	prevCallReserved = e.rc;
 }
-/*
 
 void CallTerminationEvent::handleEvent(Base blist[]){
 	if(SCHEME == 0)
@@ -27,6 +27,7 @@ void CallTerminationEvent::handleEvent(Base blist[]){
 }
 
 void CallTerminationEvent::scheme0(Base blist[]){
+	int baseID = ((int)position/DIAMETER)%Process::getBaseAmount();
 	Base * base = &blist[baseID];
 	base->decOccupiedChannel();
 	Event::success++;
@@ -34,6 +35,7 @@ void CallTerminationEvent::scheme0(Base blist[]){
 }
 
 void CallTerminationEvent::scheme1(Base blist[]){
+	int baseID = ((int)position/DIAMETER)%Process::getBaseAmount();
 	Base * base = &blist[baseID];
 	base->decOccupiedChannel();
 	if(prevCallReserved == true){
@@ -42,7 +44,6 @@ void CallTerminationEvent::scheme1(Base blist[]){
 	Event::success++;
 	return;
 }
-*/
 
 string CallTerminationEvent::toString(){
 	stringstream ss;

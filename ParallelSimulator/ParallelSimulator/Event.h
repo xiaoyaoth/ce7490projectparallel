@@ -31,15 +31,11 @@ protected:
 	float position;
 	int arrivalNo;
 	Event * nextEvent;
-	//int eid;
-
-	static int counter;
 
 	/*statistics, declared as static*/
 	static int block; // count for call-block
 	static int drop; // count of call-drop
 	static int success; //count of handover
-	static int total; //total event amount
 
 public:
 
@@ -52,7 +48,7 @@ public:
 	int getEventID();
 	int getArrivalNo();
 
-	//virtual void handleEvent(Base blist[]);
+	virtual void handleEvent(Base blist[]);
 	virtual string toString();
 	static string getResult();
 };

@@ -2,17 +2,13 @@
 
 int Event::drop = 0;
 int Event::success = 0;
-int Event::total = 0;
 int Event::block = 0;
-
-int Event::counter = 0;
 
 Event::Event(float t, float pos, int ano){
 	time = t;
 	position = pos;
 	arrivalNo = ano;
 	nextEvent = NULL;
-	Event::total++;
 }
 
 Event::Event(){
@@ -34,11 +30,9 @@ Event * Event::getNextEventPtr(){
 	return nextEvent;
 }
 
-/*
 void Event::handleEvent(Base blist[]){
 	std::cout<<"general func of handling event"<<std::endl;
 }
-*/
 
 string Event::toString(){
 	stringstream ss;

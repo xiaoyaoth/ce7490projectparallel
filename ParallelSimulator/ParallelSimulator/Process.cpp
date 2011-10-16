@@ -5,9 +5,16 @@
 #include <fstream>
 #include <string>
 
+int Process::baseAmount = 0;
+int Process::procAmount = 0;
+
 using namespace std;
 
 Process::Process(int pno, int rank, MPI_Datatype t){
+	/*MPI*/
+	pid = rank;
+	procAmount = pno;
+	baseAmount = BASENO/procAmount+1;
 	mpiType = t;
 	sendFlag = 1;
 	recvFlag = 1;
@@ -15,10 +22,6 @@ Process::Process(int pno, int rank, MPI_Datatype t){
 	recvReq = MPI_REQUEST_NULL;
 
 	/*logic*/
-	pid = rank;
-	eventAmount = 0;
-	procAmount = pno;
-	baseAmount = BASENO/procAmount+1;
 	blist = new Base[baseAmount];
 	for(int i = 0; i<baseAmount; i++){
 		int bid = rank*baseAmount + i;
@@ -32,7 +35,6 @@ Process::Process(int pno, int rank, MPI_Datatype t){
 }
 
 void Process::insert(Event * e){
-	eventAmount++;
 	queue.push(e);
 }
 
@@ -170,4 +172,12 @@ struct eventStruct Process::parseData(string rec){
 	e.time = time;
 
 	return e;
+}
+
+int Process::getBaseAmount(){
+	return baseAmount;
+}
+
+int Process::getProcAmount(){
+	return procAmount;
 }

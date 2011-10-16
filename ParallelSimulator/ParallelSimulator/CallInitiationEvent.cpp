@@ -1,4 +1,7 @@
 #include "CallInitiationEvent.h"
+#include "CallHandoverEvent.h"
+#include "CallTerminationEvent.h"
+#include "Process.h"
 
 CallInitiationEvent::CallInitiationEvent(float t, float s, float p, float d, int no)
 	:Event(t, p, no)
@@ -13,7 +16,7 @@ CallInitiationEvent::CallInitiationEvent(struct eventStruct e)
 	speed = e.speed;
 	duration = e.dura;
 }
-/*
+
 void CallInitiationEvent::handleEvent(Base blist[]){
 	if(SCHEME == 0)
 		scheme0(blist);
@@ -22,6 +25,7 @@ void CallInitiationEvent::handleEvent(Base blist[]){
 }
 
 void CallInitiationEvent::scheme0(Base blist[]){
+	int baseID = ((int)position/DIAMETER)%Process::getBaseAmount();
 	Base *base = &blist[baseID];
 	int oc = base->getOccupiedChannel(); //occupied channel 
 	//cout<<base->toString();
@@ -42,6 +46,7 @@ void CallInitiationEvent::scheme0(Base blist[]){
 }
 
 void CallInitiationEvent::scheme1(Base blist[]){
+	int baseID = ((int)position/DIAMETER)%Process::getBaseAmount();
 	Base * base = &blist[baseID];
 	int oc = base->getOccupiedChannel(); //occupied channel amount
 	bool rco = base->isReservedChannelOccupied();//reservedChannleOccupied
@@ -65,7 +70,7 @@ void CallInitiationEvent::scheme1(Base blist[]){
 		Event::block++;
 	return;
 }
-*/
+
 string CallInitiationEvent::toString(){
 	stringstream ss;
 	int baseID = (int)position/DIAMETER;
