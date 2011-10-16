@@ -74,8 +74,8 @@ void Process::run(){
 				this->insert(new CallInitiationEvent(e));
 			}
 			else{
-				int dest = e.getBaseID()/baseAmount;
-				sendEvent(e, dest);
+				sendList.push_back(e);
+
 			}
 		}
 		if(pid != 0)
@@ -98,7 +98,7 @@ void Process::run(){
 	cout<<"finish run"<<endl;
 }
 
-void Process::sendEvent(eventStruct e, int dest){
+void Process::sendEvent(){
 	MPI_Request req;
 	MPI_Status stat;
 	int flag = 0;
@@ -112,6 +112,10 @@ void Process::sendEvent(eventStruct e, int dest){
 	}
 	else
 		cout<<"no more proc"<<endl;
+}
+
+bool Process::receiveACK(){
+	MPI_Request
 }
 
 int Process::receiveEvent(){
@@ -191,9 +195,10 @@ struct eventStruct parseData(string rec){
 	speed = (float)atof(p);
 
 	eventStruct e;
+	e.etype = 0;
+	e.dest = e.getBaseID()/baseAmount;
 	e.ano = no;
 	e.dura = duration;
-	e.etype = 0;
 	e.pos = pos;
 	e.rc = 0;
 	e.speed = speed;
