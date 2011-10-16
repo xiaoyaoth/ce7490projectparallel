@@ -5,6 +5,7 @@
 #include "Base.h"
 #include "Event.h"
 #include <queue>
+#include <list>
 
 struct comp{
 	bool operator() (Event *e1, Event *e2){
@@ -37,7 +38,7 @@ public:
 
 	/*MPI operation*/
 	void sendEvent(eventStruct e, int dest);
-	int receiveEvent(MPI_Request *req, int *flag);
+	int receiveEvent();
 };
 
 #endif;

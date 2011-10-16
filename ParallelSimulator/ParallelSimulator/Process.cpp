@@ -36,8 +36,12 @@ void Process::insert(Event * e){
 }
 
 Event * Process::getNextEvent(){
-	Event * e = queue.top();
-	queue.pop();
+	Event * e;
+	if(queue.size() != 0){
+		e = queue.top();
+		queue.pop();
+	} else
+		e = NULL;
 	return e;
 }
 
@@ -46,9 +50,7 @@ int Process::getQueueSize(){
 }
 
 void Process::run(){
-	MPI_Request req;
-	int flag = true;
-	int stat;
+	int stat = 3;
 	string rec; //one record
 	eventStruct e;
 	ifstream fin;
@@ -76,7 +78,8 @@ void Process::run(){
 				sendEvent(e, dest);
 			}
 		}
-		stat = receiveEvent(&req, &flag);
+		if(pid != 0)
+			stat = receiveEvent();
 		if(stat == FINI){
 			cout<<"stat = FINI"<<endl;
 			prevFini = true;
@@ -89,36 +92,45 @@ void Process::run(){
 			break; // no event anymore, execution finished;
 		}
 		Event * cur = getNextEvent();
-		cout<<cur->toString()<<endl;
+		if(cur != NULL)
+			cout<<cur->toString()<<endl;
 	}
 	cout<<"finish run"<<endl;
 }
 
 void Process::sendEvent(eventStruct e, int dest){
-	if(dest<procAmount)
-		MPI_Send(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD);
+	MPI_Request req;
+	MPI_Status stat;
+	int flag = 0;
+	if(dest<procAmount){
+		MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &req);
+		MPI_Test(&req, &flag, &stat);
+		while(flag == false){
+			cout<<"send wait"<<endl;
+			MPI_Test(&req, &flag, &stat);
+		}
+	}
 	else
 		cout<<"no more proc"<<endl;
 }
 
-int Process::receiveEvent(MPI_Request *req,	int *flag){
+int Process::receiveEvent(){
+	MPI_Request req;
 	MPI_Status status;
 	eventStruct e;
-	if(*flag == true)
-		MPI_Irecv(&e, 1, mpiType, MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, req);
-	MPI_Test(req, flag, &status); // through debugging I found when this line is past, it directly went to finalize
-	if(*flag == true){
-		if(e.etype == FINI)
-			return FINI;
-		else if(e.etype == HANDO)
-			this->insert(new CallHandoverEvent(e));
-		else if(e.etype == INIT)
-			this->insert(new CallInitiationEvent(e));
-		else if(e.etype == TERMI)
-			this->insert(new CallTerminationEvent(e));
-		return 0;
-	}else 
-		cout<<"read fail"<<endl; 
+
+	MPI_Irecv(&e, 1, mpiType, pid-1, 99, MPI_COMM_WORLD, &req);
+	MPI_Wait(&req, &status);
+	e.toString();
+
+	if(e.etype == FINI)
+		return FINI;
+	else if(e.etype == HANDO)
+		this->insert(new CallHandoverEvent(e));
+	else if(e.etype == INIT)
+		this->insert(new CallInitiationEvent(e));
+	else if(e.etype == TERMI)
+		this->insert(new CallTerminationEvent(e));
 	return 0;
 }
 
