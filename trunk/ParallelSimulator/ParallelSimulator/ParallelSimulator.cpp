@@ -35,7 +35,7 @@ void main(int argc, char* argv[]){
 
 void initializeEnv(MPI_Datatype &t)
 {
-	int blocklen[2] = {3,4};
+	int blocklen[2] = {INTNO,FLOATNO};
 	MPI_Datatype types[2]={MPI_INT, MPI_FLOAT};
 	MPI_Aint disp[2];//A probably means address, this shows the address of the 
 	MPI_Aint intex; //A probably means address, this shows the displament in the array

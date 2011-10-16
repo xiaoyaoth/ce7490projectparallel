@@ -24,6 +24,7 @@ private:
 	MPI_Datatype mpiType;
 
 	priority_queue<Event*, vector<Event*>, comp> queue;
+	list<struct eventStruct> sendList;
 public:
 	/*initiation*/
 	Process(int procAmount, int myRank, MPI_Datatype t);
@@ -37,8 +38,9 @@ public:
 	void run();
 
 	/*MPI operation*/
-	void sendEvent(eventStruct e, int dest);
+	void sendEvent();
 	int receiveEvent();
+	bool receiveACK();
 };
 
 #endif;
