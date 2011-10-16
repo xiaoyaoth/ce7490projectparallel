@@ -17,7 +17,7 @@ CallHandoverEvent::CallHandoverEvent(float t, float s, float pos, float d, int a
 	prevCallReserved = rc;
 }
 
-CallHandoverEvent::CallHandoverEvent(eventStruct e)
+CallHandoverEvent::CallHandoverEvent(struct eventStruct e)
 	:Event(e.time, e.pos, e.ano)
 {
 	speed = e.speed;

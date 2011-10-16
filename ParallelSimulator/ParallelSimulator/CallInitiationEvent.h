@@ -12,7 +12,7 @@ private:
 	float duration;
 public:
 	CallInitiationEvent(float time, float speed, float position, float duration, int no);
-	CallInitiationEvent(eventStruct e);
+	CallInitiationEvent(struct eventStruct e);
 	//void handleEvent(Base blist[]);
 	//void scheme0(Base blist[]);
 	//void scheme1(Base blist[]);

@@ -7,7 +7,7 @@ CallInitiationEvent::CallInitiationEvent(float t, float s, float p, float d, int
 	duration = d;
 }
 
-CallInitiationEvent::CallInitiationEvent(eventStruct e)
+CallInitiationEvent::CallInitiationEvent(struct eventStruct e)
 	:Event(e.time, e.pos, e.ano)
 {
 	speed = e.speed;
