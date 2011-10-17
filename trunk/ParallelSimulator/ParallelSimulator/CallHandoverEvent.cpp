@@ -1,6 +1,5 @@
 #include "CallHandoverEvent.h"
 #include "CallTerminationEvent.h"
-#include "Process.h"
 
 CallHandoverEvent::CallHandoverEvent(float t, float s, float pos, float d, int ano)
 	:Event(t, pos, ano)
@@ -36,7 +35,7 @@ void CallHandoverEvent::handleEvent(Base blist[]){
 }
 
 void CallHandoverEvent::scheme0(Base * blist){
-	int baseID = ((int)position/DIAMETER)%Process::getBaseAmount();
+	int baseID = getBlistIndex();
 	Base *base = &blist[baseID];
 	Base *prevBase = &blist[baseID-1];
 	prevBase->decOccupiedChannel();
@@ -58,7 +57,7 @@ void CallHandoverEvent::scheme0(Base * blist){
 }
 
 void CallHandoverEvent::scheme1(Base * blist){
-	int baseID = ((int)position/DIAMETER)%Process::getBaseAmount();
+	int baseID = getBlistIndex();
 	Base *base = &blist[baseID];
 	Base *prevBase = &blist[baseID-1];
 	prevBase->decOccupiedChannel();

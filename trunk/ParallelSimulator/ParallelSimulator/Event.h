@@ -48,6 +48,13 @@ public:
 	int getEventID();
 	int getArrivalNo();
 
+	int getBlistIndex();
+	int getBlistUpperIndex(); //get the upper limit of the blist index in the process
+	float getDistanceToNextBase();
+	float getNextBasePosition();
+	void insertIntoEventQueue(Event * e);
+	void insertIntoSendList(struct eventStruct e);
+
 	virtual void handleEvent(Base blist[]);
 	virtual string toString();
 	static string getResult();

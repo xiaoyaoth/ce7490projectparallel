@@ -17,18 +17,18 @@ class Process{
 private:
 	/*logic*/
 	Base * blist;	
-	priority_queue<Event*, vector<Event*>, comp> queue;
+	static priority_queue<Event*, vector<Event*>, comp> queue;
 
 	/*MPI*/
 	static int baseAmount; // base amount in every process
 	static int procAmount; // total process amounts
-	int pid;
+	static int pid;
 	MPI_Datatype mpiType;
 	MPI_Request sendReq;
 	MPI_Request recvReq;
 	int sendFlag;
 	int recvFlag;
-	list<struct eventStruct> sendList;
+	static list<struct eventStruct> sendList;
 	struct eventStruct recvElem;
 
 public:
@@ -36,9 +36,9 @@ public:
 	Process(int procAmount, int myRank, MPI_Datatype t);
 
 	/*queue operation*/
-	void insert(Event * e);
-	Event* getNextEvent();
-	int getQueueSize();
+	static void insert(Event * e);
+	static Event* getNextEvent();
+	static int getQueueSize();
 
 	/*main logic for each process*/
 	void run();
@@ -49,6 +49,8 @@ public:
 	int recvMessage();
 	static int getBaseAmount();
 	static int getProcAmount();
+	static int getPid();
+	static void insertSendList(struct eventStruct e);
 };
 
 #endif;
