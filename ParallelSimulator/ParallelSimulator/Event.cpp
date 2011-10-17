@@ -20,7 +20,7 @@ float Event::getTime(){
 }
 
 int Event::getBaseID(){
-	return (int)position/2;
+	return (int)position/DIAMETER;
 }
 
 void Event::setNextEventPtr(Event * e){
@@ -79,6 +79,38 @@ int Event::getArrivalNo(){
 	return arrivalNo;
 }
 
-/* http://en.wikipedia.org/wiki/Virtual_function 
-what does the const mean in the C++ description of virtual function*/
+struct eventStruct Event::toHandoverStruct(int arrivalNo, float duration, float pos, bool prevCallReserved, float speed, float time){
+        eventStruct e;
+        e.ano = arrivalNo;
+        e.dura = duration;
+        e.etype = 1;
+        e.pos = pos;
+        e.rc = (int)prevCallReserved;
+        e.speed = speed;
+        e.time = time;
+        return e;
+}
 
+struct eventStruct Event::toTerminationStruct(int arrivalNo, float pos, bool prevCallReserved, float time){
+        eventStruct e;
+        e.ano = arrivalNo;
+        e.dura = -1;
+        e.etype = 2;
+        e.pos = pos;
+        e.rc = prevCallReserved;
+        e.speed = -1;
+        e.time = time;
+        return e;
+}
+
+struct eventStruct Event::toInitiationStruct(int arrivalNo, float duration, float pos, float speed, float time){
+        eventStruct e;
+        e.ano = arrivalNo;
+        e.dura = duration;
+        e.etype = 0;
+        e.pos = pos;
+        e.rc = -1;
+        e.speed = speed;
+        e.time = time;
+        return e;
+}

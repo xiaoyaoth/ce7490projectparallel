@@ -12,6 +12,7 @@
 #define HANDO 1
 #define TERMI 2
 #define FINI 3
+#define DECPREV 4
 
 #define INTNO 4
 #define FLOATNO 4
@@ -40,7 +41,7 @@ protected:
 public:
 
 	Event();
-	Event(float time, float pos, int ano);
+	Event(float time, int bid, int ano);
 	float getTime();
 	int getBaseID();
 	Event * getNextEventPtr();
@@ -58,6 +59,10 @@ public:
 	virtual void handleEvent(Base blist[]);
 	virtual string toString();
 	static string getResult();
+
+	struct eventStruct Event::toHandoverStruct(int ano, float dura, float pos, bool rc, float speed, float time);
+	struct eventStruct Event::toTerminationStruct(int ano, float pos, bool rc, float time);
+	struct eventStruct Event::toInitiationStruct(int ano, float dura, float pos, float speed, float time);
 };
 
 struct eventStruct{
