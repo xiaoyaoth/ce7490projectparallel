@@ -35,9 +35,9 @@ void CallHandoverEvent::handleEvent(Base blist[]){
 }
 
 void CallHandoverEvent::scheme0(Base * blist){
-	int baseID = getBlistIndex();
-	Base *base = &blist[baseID];
-	Base *prevBase = &blist[baseID-1];
+	int bidx = getBlistIndex(); //index in blist
+	Base *base = &blist[bidx];
+	Base *prevBase = &blist[bidx-1];
 	prevBase->decOccupiedChannel();
 	int oc = base->getOccupiedChannel(); //occupied channel amount
 	if(oc<10){//not all the channel occupied
@@ -45,7 +45,7 @@ void CallHandoverEvent::scheme0(Base * blist){
 		float handoverTS = time+3600*DIAMETER/speed;
 		float terminationTS = time + duration;
 		if(handoverTS<terminationTS)
-			if(baseID+1<20)
+			if(bid+1<20)
 				new CallHandoverEvent(handoverTS, speed, baseID+1, terminationTS-handoverTS, arrivalNo);
 			else
 				new CallTerminationEvent(handoverTS, baseID, arrivalNo);

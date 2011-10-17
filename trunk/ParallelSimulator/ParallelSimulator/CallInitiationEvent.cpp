@@ -24,27 +24,33 @@ void CallInitiationEvent::handleEvent(Base blist[]){
 }
 
 void CallInitiationEvent::scheme0(Base blist[]){
-	int baseID = getBlistIndex();
-	Base *base = &blist[baseID];
+	int rc = 0;//prevCallReserved is 0 in scheme 0;
+	int bid = getBaseID();
+	int bidx = getBlistIndex();
+	Base *base = &blist[bidx];
 	int oc = base->getOccupiedChannel(); //occupied channel 
 	//cout<<base->toString();
 	if(oc<10){
 		base->incOccupiedChannel();
 		float handoverTS = time + 3600*getDistanceToNextBase()/speed;
 		float terminationTS = time + duration;
+		float handoverPos = getNextBasePosition();
+		float terminationPos = position+speed*time;
 		if(handoverTS<terminationTS)
-			if(baseID+1<20)
-				if(baseID+1<getBlistUpperIndex())
+			if(bid+1<20)
+				if(bidx+1<getBlistUpperIndex())
 					insertIntoEventQueue(
-						new CallHandoverEvent(handoverTS, speed, getNextBasePosition(), 
+						new CallHandoverEvent(handoverTS, speed, handoverPos, 
 							terminationTS-handoverTS, arrivalNo)
 					);
-				else
-					;
+				else{
+					insertIntoSendList(toHandoverStruct(arrivalNo, terminationTS-handoverTS,
+						handoverPos, rc, speed, handoverTS));
+				}
 			else
-				new CallTerminationEvent(handoverTS, baseID, arrivalNo);
+				new CallTerminationEvent(handoverTS, getNextBasePosition(), arrivalNo);
 		else
-			new CallTerminationEvent(terminationTS, baseID, arrivalNo);
+			new CallTerminationEvent(terminationTS, terminationPos, arrivalNo);
 	}else
 		Event::block++;
 	return;
