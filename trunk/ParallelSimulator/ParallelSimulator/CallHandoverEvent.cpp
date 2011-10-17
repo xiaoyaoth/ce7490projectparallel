@@ -1,8 +1,8 @@
 #include "CallHandoverEvent.h"
 #include "CallTerminationEvent.h"
 
-CallHandoverEvent::CallHandoverEvent(float t, float s, float pos, float d, int ano)
-	:Event(t, pos, ano)
+CallHandoverEvent::CallHandoverEvent(float t, float s, int bid, float d, int ano)
+	:Event(t, bid, ano)
 {
 	speed = s;
 	duration = d;
@@ -10,8 +10,8 @@ CallHandoverEvent::CallHandoverEvent(float t, float s, float pos, float d, int a
 }
 
 
-CallHandoverEvent::CallHandoverEvent(float t, float s, float pos, float d, int ano, bool rc)
-	:Event(t, pos, ano)
+CallHandoverEvent::CallHandoverEvent(float t, float s, int bid, float d, int ano, bool rc)
+	:Event(t, bid, ano)
 {
 	speed = s;
 	duration = d;
@@ -19,7 +19,7 @@ CallHandoverEvent::CallHandoverEvent(float t, float s, float pos, float d, int a
 }
 
 CallHandoverEvent::CallHandoverEvent(struct eventStruct e)
-	:Event(e.time, e.pos, e.ano)
+	:Event(e.time, e.bid, e.ano)
 {
 	speed = e.speed;
 	duration = e.dura;
@@ -45,12 +45,12 @@ void CallHandoverEvent::scheme0(Base * blist){
 		float handoverTS = time+3600*DIAMETER/speed;
 		float terminationTS = time + duration;
 		if(handoverTS<terminationTS)
-			if(bid+1<20)
-				new CallHandoverEvent(handoverTS, speed, baseID+1, terminationTS-handoverTS, arrivalNo);
+			if(baseId+1<20)
+				new CallHandoverEvent(handoverTS, speed, baseId+1, terminationTS-handoverTS, arrivalNo);
 			else
-				new CallTerminationEvent(handoverTS, baseID, arrivalNo);
+				new CallTerminationEvent(handoverTS, baseId, arrivalNo);
 		else
-			new CallTerminationEvent(terminationTS, baseID, arrivalNo);
+			new CallTerminationEvent(terminationTS, baseId, arrivalNo);
 	}else //all the channel occupied
 		Event::drop++;
 	return;
@@ -89,10 +89,9 @@ void CallHandoverEvent::scheme1(Base * blist){
 
 string CallHandoverEvent::toString(){
 	stringstream ss;
-	int baseID = (int)position/DIAMETER;
 
 	ss<<"ano:"<<arrivalNo<<"Hando\t\t"<<time
-		<<"\t"<<baseID<<"\t"<<speed<<"\t"<<duration;
+		<<"\t"<<baseId<<"\t"<<speed<<"\t"<<duration;
 	
 	//ss<<"h "<<this->prevCallReserved<<"\t"<<time
 		//<<"\t"<<arrivalNo<<"\t";

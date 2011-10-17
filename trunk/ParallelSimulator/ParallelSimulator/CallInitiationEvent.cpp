@@ -3,15 +3,17 @@
 #include "CallTerminationEvent.h"
 
 CallInitiationEvent::CallInitiationEvent(float t, float s, float p, float d, int no)
-	:Event(t, p, no)
+	:Event(t, (int)p/DIAMETER, no)
 {
+	posInBase = p-DIAMETER*((int)p/DIAMETER);
 	speed = s;
 	duration = d;
 }
 
 CallInitiationEvent::CallInitiationEvent(struct eventStruct e)
-	:Event(e.time, e.pos, e.ano)
+	:Event(e.time, e.bid, e.ano)
 {
+	posInBase = e.posInBase;
 	speed = e.speed;
 	duration = e.dura;
 }
@@ -32,25 +34,22 @@ void CallInitiationEvent::scheme0(Base blist[]){
 	//cout<<base->toString();
 	if(oc<10){
 		base->incOccupiedChannel();
-		float handoverTS = time + 3600*getDistanceToNextBase()/speed;
+		float handoverTS = time + 3600*(DIAMETER-posInBase)/speed;
 		float terminationTS = time + duration;
-		float handoverPos = getNextBasePosition();
-		float terminationPos = position+speed*time;
 		if(handoverTS<terminationTS)
 			if(bid+1<20)
-				if(bidx+1<getBlistUpperIndex())
+				if(bidx+1<getBlistSize())
 					insertIntoEventQueue(
-						new CallHandoverEvent(handoverTS, speed, handoverPos, 
-							terminationTS-handoverTS, arrivalNo)
+					new CallHandoverEvent(handoverTS, speed, bid+1, 
+					terminationTS-handoverTS, arrivalNo)
 					);
-				else{
+				else
 					insertIntoSendList(toHandoverStruct(arrivalNo, terminationTS-handoverTS,
-						handoverPos, rc, speed, handoverTS));
-				}
+					bid+1, rc, speed, handoverTS));
 			else
-				new CallTerminationEvent(handoverTS, getNextBasePosition(), arrivalNo);
+				new CallTerminationEvent(handoverTS, bid, arrivalNo);
 		else
-			new CallTerminationEvent(terminationTS, terminationPos, arrivalNo);
+			new CallTerminationEvent(terminationTS, bid, arrivalNo);
 	}else
 		Event::block++;
 	return;
@@ -68,7 +67,7 @@ void CallInitiationEvent::scheme1(Base blist[]){
 		avc = 9-oc;
 	if(avc>0){
 		base->incOccupiedChannel();
-		float handoverTS = time + 3600*(DIAMETER-position)/speed;
+		float handoverTS = time + 3600*(DIAMETER-posInBase)/speed;
 		float terminationTS = time + duration;
 		if(handoverTS<terminationTS)
 			if(baseID+1<20)
@@ -84,10 +83,9 @@ void CallInitiationEvent::scheme1(Base blist[]){
 
 string CallInitiationEvent::toString(){
 	stringstream ss;
-	int baseID = (int)position/DIAMETER;
 
 	ss<<"ano:"<<arrivalNo<<"\tInit\t"<<arrivalNo<<"\t"<<time<<"\t"
-		<<baseID<<"\t"<<speed<<"\t"<<duration<<"\t"<<position;
+		<<baseId<<"\t"<<speed<<"\t"<<duration<<"\t"<<posInBase;
 
 	//ss<<"i"<<"\t"<<time
 	//<<"\t"<<arrivalNo<<"\t";

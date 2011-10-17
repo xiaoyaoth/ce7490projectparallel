@@ -78,7 +78,7 @@ void Process::run(){
 			e =  parseData(rec);
 			//cout<<e.ano<<" "<<e.getBaseID()/baseAmount<<" "
 				//<<e.getBaseID()<<" "<<baseAmount<<endl;
-			if(e.getBaseID()<baseAmount){
+			if(e.bid<baseAmount){
 				this->insert(new CallInitiationEvent(e));
 			}
 			else{
@@ -102,7 +102,7 @@ void Process::run(){
 		}
 		Event * cur = getNextEvent();
 		if(cur != NULL)
-			cout<<cur->toString()<<endl;
+			;//cout<<cur->toString()<<endl;
 	}
 	cout<<"finish run"<<endl;
 }
@@ -114,11 +114,11 @@ void Process::sendMessage(){
 		sendList.pop_front();
 		int dest = -1;
 		if(e.etype == INIT)
-			dest = (int)e.getBaseID()/baseAmount;
+			dest = (int)e.bid/baseAmount;
 		else
 			dest = pid+1;
-		//cout<<"send ";
-		//e.toString();
+		cout<<"send ";
+		e.toString();
 		MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
 	}
 	MPI_Test(&sendReq, &sendFlag, &stat);
@@ -127,12 +127,12 @@ void Process::sendMessage(){
 int Process::recvMessage(){
 	MPI_Status stat;
 	if(recvFlag == true){
-		//cout<<"received ";
+		cout<<"received ";
 		MPI_Irecv(&recvElem, 1, mpiType, MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &recvReq);
 	}
 	MPI_Test(&recvReq, &recvFlag, &stat);
 	if(recvFlag == true){
-		//recvElem.toString();
+		recvElem.toString();
 		if(recvElem.etype == FINI)
 			return FINI;
 		else if(recvElem.etype == HANDO)
@@ -169,7 +169,8 @@ struct eventStruct Process::parseData(string rec){
 	e.etype = 0;
 	e.ano = no;
 	e.dura = duration;
-	e.pos = pos;
+	e.bid = pos/DIAMETER;
+	e.posInBase = pos-e.bid*DIAMETER;
 	e.rc = 0;
 	e.speed = speed;
 	e.time = time;
