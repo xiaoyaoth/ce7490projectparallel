@@ -7,6 +7,9 @@
 
 int Process::baseAmount = 0;
 int Process::procAmount = 0;
+int Process::pid = 0;
+priority_queue<Event*, vector<Event*>, comp> Process::queue;
+list<struct eventStruct> Process::sendList;
 
 using namespace std;
 
@@ -180,4 +183,12 @@ int Process::getBaseAmount(){
 
 int Process::getProcAmount(){
 	return procAmount;
+}
+
+int Process::getPid(){
+	return pid;
+}
+
+void Process::insertSendList(struct eventStruct e){
+	sendList.push_back(e);
 }

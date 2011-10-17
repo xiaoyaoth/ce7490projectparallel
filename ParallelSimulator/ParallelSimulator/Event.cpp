@@ -1,4 +1,5 @@
 #include "Event.h"
+#include "Process.h"
 
 int Event::drop = 0;
 int Event::success = 0;
@@ -28,6 +29,32 @@ void Event::setNextEventPtr(Event * e){
 
 Event * Event::getNextEventPtr(){
 	return nextEvent;
+}
+
+int Event::getBlistIndex(){
+	return ((int)position/DIAMETER)%Process::getBaseAmount();
+}
+
+int Event::getBlistUpperIndex(){
+	return Process::getPid()*Process::getBaseAmount();
+}
+
+float Event::getDistanceToNextBase(){
+	int nextBaseId = 1+(int)position/DIAMETER;
+	return nextBaseId*DIAMETER-position;
+}
+
+float Event::getNextBasePosition(){
+	int nextBaseId = 1+(int)position/DIAMETER;
+	return nextBaseId*DIAMETER;
+}
+
+void Event::insertIntoEventQueue(Event * e){
+	Process::insert(e);
+}
+
+void Event::insertIntoSendList(struct eventStruct e){
+	Process::insertSendList(e);
 }
 
 void Event::handleEvent(Base blist[]){

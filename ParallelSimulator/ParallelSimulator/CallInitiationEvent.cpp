@@ -1,7 +1,6 @@
 #include "CallInitiationEvent.h"
 #include "CallHandoverEvent.h"
 #include "CallTerminationEvent.h"
-#include "Process.h"
 
 CallInitiationEvent::CallInitiationEvent(float t, float s, float p, float d, int no)
 	:Event(t, p, no)
@@ -25,17 +24,23 @@ void CallInitiationEvent::handleEvent(Base blist[]){
 }
 
 void CallInitiationEvent::scheme0(Base blist[]){
-	int baseID = ((int)position/DIAMETER)%Process::getBaseAmount();
+	int baseID = getBlistIndex();
 	Base *base = &blist[baseID];
 	int oc = base->getOccupiedChannel(); //occupied channel 
 	//cout<<base->toString();
 	if(oc<10){
 		base->incOccupiedChannel();
-		float handoverTS = time + 3600*(DIAMETER-position)/speed;
+		float handoverTS = time + 3600*getDistanceToNextBase()/speed;
 		float terminationTS = time + duration;
 		if(handoverTS<terminationTS)
 			if(baseID+1<20)
-				new CallHandoverEvent(handoverTS, speed, baseID+1, terminationTS-handoverTS, arrivalNo);
+				if(baseID+1<getBlistUpperIndex())
+					insertIntoEventQueue(
+						new CallHandoverEvent(handoverTS, speed, getNextBasePosition(), 
+							terminationTS-handoverTS, arrivalNo)
+					);
+				else
+					;
 			else
 				new CallTerminationEvent(handoverTS, baseID, arrivalNo);
 		else
@@ -46,7 +51,7 @@ void CallInitiationEvent::scheme0(Base blist[]){
 }
 
 void CallInitiationEvent::scheme1(Base blist[]){
-	int baseID = ((int)position/DIAMETER)%Process::getBaseAmount();
+	int baseID = getBlistIndex();
 	Base * base = &blist[baseID];
 	int oc = base->getOccupiedChannel(); //occupied channel amount
 	bool rco = base->isReservedChannelOccupied();//reservedChannleOccupied
@@ -77,9 +82,9 @@ string CallInitiationEvent::toString(){
 
 	ss<<"ano:"<<arrivalNo<<"\tInit\t"<<arrivalNo<<"\t"<<time<<"\t"
 		<<baseID<<"\t"<<speed<<"\t"<<duration<<"\t"<<position;
-	
+
 	//ss<<"i"<<"\t"<<time
-		//<<"\t"<<arrivalNo<<"\t";
+	//<<"\t"<<arrivalNo<<"\t";
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();
