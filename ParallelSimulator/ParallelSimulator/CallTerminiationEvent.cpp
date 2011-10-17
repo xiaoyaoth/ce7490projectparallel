@@ -1,19 +1,19 @@
 #include "CallTerminationEvent.h"
 
-CallTerminationEvent::CallTerminationEvent(float t, float pos, int ano)
-	:Event(t, pos, ano)
+CallTerminationEvent::CallTerminationEvent(float t, int bid, int ano)
+	:Event(t, bid, ano)
 {
 	prevCallReserved = false;
 }
 
-CallTerminationEvent::CallTerminationEvent(float t, float pos, int ano, bool rc)
-	:Event(t, pos, ano)
+CallTerminationEvent::CallTerminationEvent(float t, int bid, int ano, bool rc)
+	:Event(t, bid, ano)
 {
 	prevCallReserved = rc;
 }
 
 CallTerminationEvent::CallTerminationEvent(struct eventStruct e)
-	:Event(e.time, e.pos, e.ano)
+	:Event(e.time, e.bid, e.ano)
 {
 	prevCallReserved = e.rc;
 }
@@ -46,8 +46,7 @@ void CallTerminationEvent::scheme1(Base blist[]){
 
 string CallTerminationEvent::toString(){
 	stringstream ss;
-	int baseID = (int)position/DIAMETER;
-	ss<<"ano:"<<arrivalNo<<"Termi\t\t"<<time<<"\t"<<baseID;
+	ss<<"ano:"<<arrivalNo<<"Termi\t\t"<<time<<"\t"<<baseId;
 	
 	//ss<<"t "<<prevCallReserved<<"\t"<<time
 		//<<"\t"<<arrivalNo<<"\t";

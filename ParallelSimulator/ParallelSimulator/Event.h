@@ -29,9 +29,8 @@ protected:
 
 	/*Event attribute*/
 	float time;
-	float position;
+	int baseId;
 	int arrivalNo;
-	Event * nextEvent;
 
 	/*statistics, declared as static*/
 	static int block; // count for call-block
@@ -39,7 +38,7 @@ protected:
 	static int success; //count of handover
 
 public:
-
+	/*logic*/
 	Event();
 	Event(float time, int bid, int ano);
 	float getTime();
@@ -49,20 +48,19 @@ public:
 	int getEventID();
 	int getArrivalNo();
 
-	int getBlistIndex();
-	int getBlistUpperIndex(); //get the upper limit of the blist index in the process
-	float getDistanceToNextBase();
-	float getNextBasePosition();
-	void insertIntoEventQueue(Event * e);
-	void insertIntoSendList(struct eventStruct e);
-
 	virtual void handleEvent(Base blist[]);
 	virtual string toString();
 	static string getResult();
 
-	struct eventStruct Event::toHandoverStruct(int ano, float dura, float pos, bool rc, float speed, float time);
-	struct eventStruct Event::toTerminationStruct(int ano, float pos, bool rc, float time);
+	/*MPI*/
+	void insertIntoEventQueue(Event * e);
+	void insertIntoSendList(struct eventStruct e);
+	int getBlistIndex();
+	int getBlistSize();
+
 	struct eventStruct Event::toInitiationStruct(int ano, float dura, float pos, float speed, float time);
+	struct eventStruct Event::toHandoverStruct(int ano, float dura, int bid, bool rc, float speed, float time);
+	struct eventStruct Event::toTerminationStruct(int ano, int bid, bool rc, float time);	
 };
 
 struct eventStruct{
@@ -72,19 +70,16 @@ struct eventStruct{
 	/*parameter related logic*/
 	int ano;
 	int rc;
+	int bid;
 	float time;
 	float speed;
 	float dura;
-	float pos;
+	float posInBase;
 
 	void toString(){
 		cout<<"type:"<<etype<<"\tano:"<<ano<<"\tdura:"<<dura
-			<<"\tbid:"<<getBaseID()<<"\trc:"<<rc<<"\tspeed:"<<speed
-			<<"\ttime:"<<time<<endl;
-	}
-
-	int getBaseID(){
-		return (int)pos/DIAMETER;
+			<<"\tbid:"<<bid<<"\tposInBase:"<<posInBase<<"\trc:"
+			<<rc<<"\tspeed:"<<speed<<"\ttime:"<<time<<endl;
 	}
 };
 

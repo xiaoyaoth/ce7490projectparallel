@@ -10,8 +10,8 @@ private:
 	float duration;
 	bool prevCallReserved; // added for the second scheme
 public:
-	CallHandoverEvent(float t, float s, float pos, float d, int ano);
-	CallHandoverEvent(float t, float s, float pos, float d, int ano, bool rc);// added for the second scheme
+	CallHandoverEvent(float t, float s, int bid, float d, int ano);
+	CallHandoverEvent(float t, float s, int bid, float d, int ano, bool rc);// added for the second scheme
 	CallHandoverEvent(struct eventStruct e);
 	void handleEvent(Base blist[]);
 	void scheme0(Base blist[]);

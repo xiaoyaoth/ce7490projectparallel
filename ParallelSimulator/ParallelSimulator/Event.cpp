@@ -5,56 +5,22 @@ int Event::drop = 0;
 int Event::success = 0;
 int Event::block = 0;
 
-Event::Event(float t, float pos, int ano){
+Event::Event(float t, int bid, int ano){
 	time = t;
-	position = pos;
+	baseId = bid;
 	arrivalNo = ano;
-	nextEvent = NULL;
 }
 
 Event::Event(){
 }
 
+/*Logic*/
 float Event::getTime(){
 	return time;
 }
 
 int Event::getBaseID(){
-	return (int)position/DIAMETER;
-}
-
-void Event::setNextEventPtr(Event * e){
-	nextEvent = e;
-}
-
-Event * Event::getNextEventPtr(){
-	return nextEvent;
-}
-
-int Event::getBlistIndex(){
-	return ((int)position/DIAMETER)%Process::getBaseAmount();
-}
-
-int Event::getBlistUpperIndex(){
-	return Process::getPid()*Process::getBaseAmount();
-}
-
-float Event::getDistanceToNextBase(){
-	int nextBaseId = 1+(int)position/DIAMETER;
-	return nextBaseId*DIAMETER-position;
-}
-
-float Event::getNextBasePosition(){
-	int nextBaseId = 1+(int)position/DIAMETER;
-	return nextBaseId*DIAMETER;
-}
-
-void Event::insertIntoEventQueue(Event * e){
-	Process::insert(e);
-}
-
-void Event::insertIntoSendList(struct eventStruct e){
-	Process::insertSendList(e);
+	return baseId;
 }
 
 void Event::handleEvent(Base blist[]){
@@ -67,7 +33,6 @@ string Event::toString(){
 	return ss.str();
 }
 
-
 string Event::getResult(){
 	stringstream ss;
 	ss<<"success\tdrop\tblock\t"<<endl;
@@ -75,32 +40,25 @@ string Event::getResult(){
 	return ss.str();
 }
 
+/*MPI*/
+void Event::insertIntoEventQueue(Event * e){
+	Process::insert(e);
+}
+
+void Event::insertIntoSendList(struct eventStruct e){
+	Process::insertSendList(e);
+}
+
+int Event::getBlistIndex(){
+	return baseId%Process::getBaseAmount();
+}
+
+int Event::getBlistSize(){
+	return Process::getBaseAmount();
+}
+
 int Event::getArrivalNo(){
 	return arrivalNo;
-}
-
-struct eventStruct Event::toHandoverStruct(int arrivalNo, float duration, float pos, bool prevCallReserved, float speed, float time){
-        eventStruct e;
-        e.ano = arrivalNo;
-        e.dura = duration;
-        e.etype = 1;
-        e.pos = pos;
-        e.rc = (int)prevCallReserved;
-        e.speed = speed;
-        e.time = time;
-        return e;
-}
-
-struct eventStruct Event::toTerminationStruct(int arrivalNo, float pos, bool prevCallReserved, float time){
-        eventStruct e;
-        e.ano = arrivalNo;
-        e.dura = -1;
-        e.etype = 2;
-        e.pos = pos;
-        e.rc = prevCallReserved;
-        e.speed = -1;
-        e.time = time;
-        return e;
 }
 
 struct eventStruct Event::toInitiationStruct(int arrivalNo, float duration, float pos, float speed, float time){
@@ -108,9 +66,36 @@ struct eventStruct Event::toInitiationStruct(int arrivalNo, float duration, floa
         e.ano = arrivalNo;
         e.dura = duration;
         e.etype = 0;
-        e.pos = pos;
+		e.bid = (int)pos/DIAMETER;
+        e.posInBase = pos-DIAMETER*e.bid;
         e.rc = -1;
         e.speed = speed;
+        e.time = time;
+        return e;
+}
+
+struct eventStruct Event::toHandoverStruct(int arrivalNo, float duration, int bid, bool prevCallReserved, float speed, float time){
+        eventStruct e;
+        e.ano = arrivalNo;
+        e.dura = duration;
+        e.etype = 1;
+		e.bid = bid;
+        e.posInBase = 0;
+        e.rc = (int)prevCallReserved;
+        e.speed = speed;
+        e.time = time;
+        return e;
+}
+
+struct eventStruct Event::toTerminationStruct(int arrivalNo, int bid, bool prevCallReserved, float time){
+        eventStruct e;
+        e.ano = arrivalNo;
+        e.dura = -1;
+        e.etype = 2;
+		e.bid = bid;
+        e.posInBase = -1;
+        e.rc = prevCallReserved;
+        e.speed = -1;
         e.time = time;
         return e;
 }
