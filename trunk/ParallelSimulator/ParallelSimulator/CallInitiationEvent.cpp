@@ -38,18 +38,18 @@ void CallInitiationEvent::scheme0(Base blist[]){
 		float terminationTS = time + duration;
 		if(handoverTS<terminationTS)
 			if(bid+1<20)
-				if(bidx+1<getBlistSize())
-					insertIntoEventQueue(
-					new CallHandoverEvent(handoverTS, speed, bid+1, 
-					terminationTS-handoverTS, arrivalNo)
-					);
+				if(bidx+1<getBlistSize()){
+					CallHandoverEvent *ev = new CallHandoverEvent(handoverTS, 
+						speed, bid+1, terminationTS-handoverTS, arrivalNo);
+					insertIntoEventQueue(ev);
+				}
 				else
 					insertIntoSendList(toHandoverStruct(arrivalNo, terminationTS-handoverTS,
 					bid+1, rc, speed, handoverTS));
 			else
-				new CallTerminationEvent(handoverTS, bid, arrivalNo);
+				insertIntoEventQueue(new CallTerminationEvent(handoverTS, bid, arrivalNo));
 		else
-			new CallTerminationEvent(terminationTS, bid, arrivalNo);
+			insertIntoEventQueue(new CallTerminationEvent(terminationTS, bid, arrivalNo));
 	}else
 		Event::block++;
 	return;

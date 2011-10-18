@@ -2,7 +2,6 @@
 #include "CallHandoverEvent.h"
 #include "CallInitiationEvent.h"
 #include "CallTerminationEvent.h"
-#include <fstream>
 #include <string>
 
 int Process::baseAmount = 0;
@@ -60,7 +59,10 @@ void Process::run(){
 	string rec; //one record
 	struct eventStruct e;
 	ifstream fin;
-	ofstream fout("out.txt");
+
+	stringstream ss;
+	ss<<pid<<".txt";
+	ofstream fout(ss.str().c_str());
 
 	int i = 0;
 	bool fini = false; //current process fini
@@ -73,6 +75,7 @@ void Process::run(){
 	}
 
 	while(!fini){
+		i++;
 		if(pid == 0 && !fin.eof()){
 			getline(fin, rec);
 			e =  parseData(rec);
@@ -101,10 +104,13 @@ void Process::run(){
 			break; // no event anymore, execution finished;
 		}
 		Event * cur = getNextEvent();
-		if(cur != NULL)
-			;//cout<<cur->toString()<<endl;
+		if(cur != NULL){
+			fout<<cur->toString()<<"\t";
+			fout<<blist[cur->getBlistIndex()].toString()<<endl;
+			cur->handleEvent(blist);
+		}
 	}
-	cout<<"finish run"<<endl;
+	cout<<"finish run, while loop: "<<i<<endl;
 }
 
 void Process::sendMessage(){
@@ -115,24 +121,26 @@ void Process::sendMessage(){
 		int dest = -1;
 		if(e.etype == INIT)
 			dest = (int)e.bid/baseAmount;
+		else if(e.etype == DECPREV)
+			dest = pid-1;
 		else
 			dest = pid+1;
-		cout<<"send ";
-		e.toString();
+		if(dest>=procAmount)
+			e.toString();
 		MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
 	}
 	MPI_Test(&sendReq, &sendFlag, &stat);
 }
 
-int Process::recvMessage(){
+int Process::recvMessage(){ // rollback should happens here
 	MPI_Status stat;
 	if(recvFlag == true){
-		cout<<"received ";
+		//cout<<"received ";
 		MPI_Irecv(&recvElem, 1, mpiType, MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &recvReq);
 	}
 	MPI_Test(&recvReq, &recvFlag, &stat);
 	if(recvFlag == true){
-		recvElem.toString();
+		//recvElem.toString();
 		if(recvElem.etype == FINI)
 			return FINI;
 		else if(recvElem.etype == HANDO)
@@ -141,6 +149,13 @@ int Process::recvMessage(){
 			this->insert(new CallInitiationEvent(recvElem));
 		else if(recvElem.etype == TERMI)
 			this->insert(new CallTerminationEvent(recvElem));
+		else if(recvElem.etype == DECPREV){
+			int bidx = recvElem.bid%baseAmount;
+			if(bidx!=baseAmount-1)
+				cout<<"bidx!=baseAmount-1"<<endl;
+			else
+				blist[bidx].decOccupiedChannel();
+		}
 		return 0;
 	}
 }
@@ -191,5 +206,10 @@ int Process::getPid(){
 }
 
 void Process::insertSendList(struct eventStruct e){
-	sendList.push_back(e);
+	if(e.etype == DECPREV){
+		sendList.push_front(e);
+		sendList.front().toString();
+	}
+	else
+		sendList.push_back(e);
 }

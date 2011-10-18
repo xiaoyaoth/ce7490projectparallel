@@ -6,7 +6,7 @@
 #endif
 
 #define DIAMETER 2
-#define SCHEME 1
+#define SCHEME 0
 
 #define INIT 0
 #define HANDO 1
