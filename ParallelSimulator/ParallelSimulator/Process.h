@@ -6,6 +6,7 @@
 #include "Event.h"
 #include <queue>
 #include <list>
+#include <fstream>
 
 struct comp{
 	bool operator() (Event *e1, Event *e2){

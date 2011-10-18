@@ -44,7 +44,7 @@ void initializeEnv(MPI_Datatype &t)
 	MPI_Type_extent(MPI_INT, &intex);
 
 	disp[0] = (MPI_Aint)0;
-	disp[1] = intex+intex+intex;
+	disp[1] = intex*INTNO;
 
 	MPI_Type_struct(2, blocklen, disp, types, &t);
 	MPI_Type_commit(&t);
