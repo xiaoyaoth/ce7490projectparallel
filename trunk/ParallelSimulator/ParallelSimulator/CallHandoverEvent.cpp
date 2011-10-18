@@ -47,6 +47,7 @@ void CallHandoverEvent::scheme0(Base * blist){
 		e.etype = DECPREV;
 		e.bid = bid-1;
 		e.rc = 0;
+		e.time = time;
 		insertIntoSendList(e);
 	}
 	int oc = base->getOccupiedChannel(); //occupied channel amount

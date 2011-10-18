@@ -8,7 +8,9 @@ int Process::baseAmount = 0;
 int Process::procAmount = 0;
 int Process::pid = 0;
 priority_queue<Event*, vector<Event*>, comp> Process::queue;
+priority_queue<Event*, vector<Event*>, reverseComp> Process::revQueue;
 list<struct eventStruct> Process::sendList;
+
 
 using namespace std;
 
@@ -34,6 +36,7 @@ Process::Process(int pno, int rank, MPI_Datatype t){
 		cout<<blist[i].getBaseID()<<endl;
 	}
 	queue.empty();
+	time = 0;
 }
 
 void Process::insert(Event * e){
@@ -75,8 +78,7 @@ void Process::run(){
 	}
 
 	while(!fini){
-		i++;
-		if(pid == 0 && !fin.eof()){
+		if(pid == 0 && !fin.eof() && ++i<500){
 			getline(fin, rec);
 			e =  parseData(rec);
 			//cout<<e.ano<<" "<<e.getBaseID()/baseAmount<<" "
@@ -107,10 +109,17 @@ void Process::run(){
 		if(cur != NULL){
 			fout<<cur->toString()<<"\t";
 			fout<<blist[cur->getBlistIndex()].toString()<<endl;
+			if(cur->getTime()>time){
+				time = cur->getTime();
+				cout<<time<<endl;
+			}
+			else
+				cout<<cur->toString()<<"\t LP time:"<<time<<endl;
+			
+			revQueue.push(cur);
 			cur->handleEvent(blist);
 		}
 	}
-	cout<<"finish run, while loop: "<<i<<endl;
 }
 
 void Process::sendMessage(){

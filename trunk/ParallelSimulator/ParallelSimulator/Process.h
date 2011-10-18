@@ -1,9 +1,12 @@
 #ifndef PROCESS_H_
 #define PROCESS_H_
 
+#define FREQ 100 // state saving freqency
+
 #include "mpi.h"
 #include "Base.h"
 #include "Event.h"
+#include "State.h"
 #include <queue>
 #include <list>
 #include <fstream>
@@ -14,11 +17,19 @@ struct comp{
 	}
 };
 
+struct reverseComp{
+	bool operator() (Event *e1, Event *e2){
+		return e1->getTime()<e2->getTime();
+	}
+};
+
 class Process{
 private:
 	/*logic*/
 	Base * blist;	
 	static priority_queue<Event*, vector<Event*>, comp> queue;
+	static priority_queue<Event*, vector<Event*>, reverseComp> revQueue;
+	float time;
 
 	/*MPI*/
 	static int baseAmount; // base amount in every process
@@ -30,6 +41,7 @@ private:
 	int sendFlag;
 	int recvFlag;
 	static list<struct eventStruct> sendList;
+	static list<State> stateList;
 	struct eventStruct recvElem;
 
 public:
