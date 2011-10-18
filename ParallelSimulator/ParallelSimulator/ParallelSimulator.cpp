@@ -26,9 +26,9 @@ void main(int argc, char* argv[]){
 	MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 	initializeEnv(mpiType);
 
-	Process p(procsAmount, myRank, mpiType);
-	p.run();
-
+	//Process p(procsAmount, myRank, mpiType);
+	//p.run();
+	cout<<sizeof(State);
 	//test(myRank);
 
 	MPI_Type_free(&mpiType);
