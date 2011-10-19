@@ -1,12 +1,9 @@
 #ifndef PROCESS_H_
 #define PROCESS_H_
 
-#define FREQ 100 // state saving freqency
-
 #include "mpi.h"
 #include "Base.h"
 #include "Event.h"
-#include "State.h"
 #include <queue>
 #include <list>
 #include <fstream>
@@ -41,7 +38,6 @@ private:
 	int sendFlag;
 	int recvFlag;
 	static list<struct eventStruct> sendList;
-	static list<State> stateList;
 	struct eventStruct recvElem;
 
 public:

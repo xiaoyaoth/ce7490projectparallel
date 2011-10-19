@@ -3,6 +3,10 @@
 #include "CallInitiationEvent.h"
 #include "CallTerminationEvent.h"
 #include <string>
+#include <iostream>
+
+
+#define FREQ 100 // state saving freqency
 
 int Process::baseAmount = 0;
 int Process::procAmount = 0;
@@ -10,7 +14,6 @@ int Process::pid = 0;
 priority_queue<Event*, vector<Event*>, comp> Process::queue;
 priority_queue<Event*, vector<Event*>, reverseComp> Process::revQueue;
 list<struct eventStruct> Process::sendList;
-
 
 using namespace std;
 
@@ -60,14 +63,14 @@ int Process::getQueueSize(){
 void Process::run(){
 	int ret = 0; //received event type
 	string rec; //one record
-	struct eventStruct e;
 	ifstream fin;
 
 	stringstream ss;
 	ss<<pid<<".txt";
 	ofstream fout(ss.str().c_str());
 
-	int i = 0;
+	int j = 0;
+	int eventCount = 0;
 	bool fini = false; //current process fini
 	bool prevFini = false; // previous process has finished;
 
@@ -77,8 +80,10 @@ void Process::run(){
 			cout<<"file not exist"<<endl;
 	}
 
+	const int READAMOUNT = 500;
 	while(!fini){
-		if(pid == 0 && !fin.eof() && ++i<500){
+		if(pid == 0 && !fin.eof() && ++j<READAMOUNT){
+			struct eventStruct e;
 			getline(fin, rec);
 			e =  parseData(rec);
 			//cout<<e.ano<<" "<<e.getBaseID()/baseAmount<<" "
@@ -92,12 +97,16 @@ void Process::run(){
 		} else
 			ret = FINI;
 		sendMessage();
-		if(pid != 0)
-			ret = recvMessage();
-		if(ret == FINI){
+		//if(pid != 0) // this is not correct
+		ret = recvMessage();
+		/* this condition is specially designed for process 0 (pid == 0) 
+		  (pid == 0 && queue.size() == 0 && sendList.size() == 0 && (fin.eof()||j>=500))
+		  READAMOUNT is used for debug*/
+		if(ret == FINI || (pid == 0 && queue.size() == 0 && sendList.size() == 0 && (fin.eof()||j>=READAMOUNT))){
 			prevFini = true;
 		}
-		if(prevFini == true && queue.size() == 0){
+		if(prevFini == true && queue.size() == 0 && sendList.size() == 0){
+			struct eventStruct e;
 			fini = true;
 			e.etype = FINI;
 			sendList.push_back(e);
@@ -109,17 +118,22 @@ void Process::run(){
 		if(cur != NULL){
 			fout<<cur->toString()<<"\t";
 			fout<<blist[cur->getBlistIndex()].toString()<<endl;
-			if(cur->getTime()>time){
-				time = cur->getTime();
-				cout<<time<<endl;
-			}
-			else
-				cout<<cur->toString()<<"\t LP time:"<<time<<endl;
-			
+			if(cur->getTime()>time)
+				time = cur->getTime();			
 			revQueue.push(cur);
 			cur->handleEvent(blist);
+			cout<<cur->toString()<<endl;
+
+			eventCount++;
+			if(eventCount%FREQ == 0){
+				for(int i = 0; i<baseAmount; i++)
+					blist[i].saveState(time);
+			}
 		}
 	}
+	for(int i = 0; i<baseAmount; i++)
+		blist[i].printStateList();
+	cout<<"finish run"<<endl;
 }
 
 void Process::sendMessage(){
@@ -128,15 +142,18 @@ void Process::sendMessage(){
 		struct eventStruct e = sendList.front();
 		sendList.pop_front();
 		int dest = -1;
+
 		if(e.etype == INIT)
 			dest = (int)e.bid/baseAmount;
 		else if(e.etype == DECPREV)
 			dest = pid-1;
 		else
 			dest = pid+1;
+
 		if(dest>=procAmount)
-			e.toString();
-		MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
+			e.toString(); /*debug*/
+		else
+			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
 	}
 	MPI_Test(&sendReq, &sendFlag, &stat);
 }
@@ -164,7 +181,7 @@ int Process::recvMessage(){ // rollback should happens here
 				cout<<"bidx!=baseAmount-1"<<endl;
 			else
 				blist[bidx].decOccupiedChannel();
-		}
+		} 
 		return 0;
 	}
 }
@@ -217,7 +234,7 @@ int Process::getPid(){
 void Process::insertSendList(struct eventStruct e){
 	if(e.etype == DECPREV){
 		sendList.push_front(e);
-		sendList.front().toString();
+		//sendList.front().toString(); /*debug*/
 	}
 	else
 		sendList.push_back(e);
