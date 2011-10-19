@@ -45,8 +45,8 @@ public:
 	bool isReservedChannelOccupied();
 
 	void saveState(float t);
-	void printStateList();
-
+	
+	string printStateList();
 	string toString();
 };
 #endif
