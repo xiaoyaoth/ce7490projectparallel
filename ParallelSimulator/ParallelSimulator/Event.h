@@ -17,11 +17,8 @@
 #define INTNO 4
 #define FLOATNO 4
 
-#include <iostream>
 #include <sstream>
 #include "Base.h"
-
-using namespace std;
 
 class Event{
 
@@ -76,10 +73,12 @@ struct eventStruct{
 	float dura;
 	float posInBase;
 
-	void toString(){
-		cout<<"type:"<<etype<<"\tano:"<<ano<<"\tdura:"<<dura
+	string toString(){
+		stringstream ss;
+		ss<<"type:"<<etype<<"\tano:"<<ano<<"\tdura:"<<dura
 			<<"\tbid:"<<bid<<"\tposInBase:"<<posInBase<<"\trc:"
 			<<rc<<"\tspeed:"<<speed<<"\ttime:"<<time<<endl;
+		return ss.str();
 	}
 };
 

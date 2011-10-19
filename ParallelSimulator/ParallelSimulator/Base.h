@@ -7,14 +7,28 @@
 
 #include <string>
 #include <sstream>
+#include <list>
 
 using namespace std;//omit this may cause TOSTRING function erronous
+
+struct baseState{
+	float time;
+	bool rco;
+	int oc;
+	
+	string toString(){
+		stringstream ss;
+		ss<<time<<"_"<<oc<<"_"<<rco<<" || ";
+		return ss.str();
+	}
+};
 
 class Base{
 private:
 	int occupiedChannel;
 	bool reservedChannelOccupied; // added for the second scheme
 	int baseID;
+	list<struct baseState> stateList;
 public:
 	Base();
 	Base(int bid);
@@ -29,6 +43,9 @@ public:
 	void initializeReservation();
 	void toggleReservation();
 	bool isReservedChannelOccupied();
+
+	void saveState(float t);
+	void printStateList();
 
 	string toString();
 };

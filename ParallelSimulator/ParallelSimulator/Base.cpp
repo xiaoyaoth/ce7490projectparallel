@@ -53,6 +53,23 @@ bool Base::isReservedChannelOccupied(){
 	return reservedChannelOccupied;
 }
 
+void Base::saveState(float time){
+	struct baseState bs;
+	bs.time = time;
+	bs.rco = reservedChannelOccupied;
+	bs.oc = occupiedChannel;
+	stateList.push_back(bs);
+}
+
+void Base::printStateList(){
+	cout<<"bid:"<<baseID<<endl;
+	while(stateList.size()>0){
+		cout<<stateList.front().toString();
+		stateList.pop_front();
+	}
+	cout<<endl;
+}
+
 string Base::toString(){
 	stringstream ss;
 	//if(10 == baseID)
