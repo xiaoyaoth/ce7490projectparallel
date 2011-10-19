@@ -1,5 +1,4 @@
 #include "Base.h"
-#include <iostream>
 
 Base::Base(){
 	baseID = 0;
@@ -61,13 +60,14 @@ void Base::saveState(float time){
 	stateList.push_back(bs);
 }
 
-void Base::printStateList(){
-	cout<<"bid:"<<baseID<<endl;
+string Base::printStateList(){
+	stringstream ss;
+	ss<<"bid:"<<baseID<<endl;
 	while(stateList.size()>0){
-		cout<<stateList.front().toString();
+		ss<<stateList.front().toString();
 		stateList.pop_front();
 	}
-	cout<<endl;
+	return ss.str();
 }
 
 string Base::toString(){

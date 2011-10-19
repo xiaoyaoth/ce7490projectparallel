@@ -60,6 +60,60 @@ int Process::getQueueSize(){
 	return queue.size();
 }
 
+struct eventStruct Process::parseData(string rec){
+	char * cstr, *p;
+	int no, baseID;
+	float time, duration, speed, pos;
+
+	cstr = new char[rec.size()+1];
+	strcpy_s(cstr, rec.size()+1, rec.c_str());
+
+	p=strtok (cstr,"\t");
+	no = atoi(p);
+	p=strtok(NULL,"\t");
+	time = (float)atof(p);
+	p=strtok(NULL,"\t");
+	baseID = atoi(p) - 1;
+	pos = (float)baseID*2 + 1;
+	p=strtok(NULL,"\t");
+	duration = (float)atof(p);
+	p=strtok(NULL,"\t");
+	speed = (float)atof(p);
+
+	struct eventStruct e;
+	e.etype = 0;
+	e.ano = no;
+	e.dura = duration;
+	e.bid = pos/DIAMETER;
+	e.posInBase = pos-e.bid*DIAMETER;
+	e.rc = 0;
+	e.speed = speed;
+	e.time = time;
+
+	return e;
+}
+
+int Process::getBaseAmount(){
+	return baseAmount;
+}
+
+int Process::getProcAmount(){
+	return procAmount;
+}
+
+int Process::getPid(){
+	return pid;
+}
+
+void Process::insertSendList(struct eventStruct e){
+	if(e.etype == DECPREV){
+		sendList.push_front(e);
+		//sendList.front().toString(); /*debug*/
+	}
+	else
+		sendList.push_back(e);
+}
+
 void Process::run(){
 	int ret = 0; //received event type
 	string rec; //one record
@@ -132,7 +186,7 @@ void Process::run(){
 		}
 	}
 	for(int i = 0; i<baseAmount; i++)
-		blist[i].printStateList();
+		cout<<blist[i].printStateList()<<endl;
 	cout<<"finish run"<<endl;
 }
 
@@ -186,56 +240,5 @@ int Process::recvMessage(){ // rollback should happens here
 	}
 }
 
-struct eventStruct Process::parseData(string rec){
-	char * cstr, *p;
-	int no, baseID;
-	float time, duration, speed, pos;
-
-	cstr = new char[rec.size()+1];
-	strcpy_s(cstr, rec.size()+1, rec.c_str());
-
-	p=strtok (cstr,"\t");
-	no = atoi(p);
-	p=strtok(NULL,"\t");
-	time = (float)atof(p);
-	p=strtok(NULL,"\t");
-	baseID = atoi(p) - 1;
-	pos = (float)baseID*2 + 1;
-	p=strtok(NULL,"\t");
-	duration = (float)atof(p);
-	p=strtok(NULL,"\t");
-	speed = (float)atof(p);
-
-	struct eventStruct e;
-	e.etype = 0;
-	e.ano = no;
-	e.dura = duration;
-	e.bid = pos/DIAMETER;
-	e.posInBase = pos-e.bid*DIAMETER;
-	e.rc = 0;
-	e.speed = speed;
-	e.time = time;
-
-	return e;
-}
-
-int Process::getBaseAmount(){
-	return baseAmount;
-}
-
-int Process::getProcAmount(){
-	return procAmount;
-}
-
-int Process::getPid(){
-	return pid;
-}
-
-void Process::insertSendList(struct eventStruct e){
-	if(e.etype == DECPREV){
-		sendList.push_front(e);
-		//sendList.front().toString(); /*debug*/
-	}
-	else
-		sendList.push_back(e);
+void ::Process::rollback(){
 }

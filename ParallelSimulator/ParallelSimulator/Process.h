@@ -56,6 +56,7 @@ public:
 	/*MPI operation*/
 	void sendMessage();
 	int recvMessage();
+	void rollback();
 	static int getBaseAmount();
 	static int getProcAmount();
 	static int getPid();
