@@ -14,18 +14,11 @@ struct comp{
 	}
 };
 
-struct reverseComp{
-	bool operator() (Event *e1, Event *e2){
-		return e1->getTime()<e2->getTime();
-	}
-};
-
 class Process{
 private:
 	/*logic*/
 	Base * blist;	
 	static priority_queue<Event*, vector<Event*>, comp> queue;
-	static priority_queue<Event*, vector<Event*>, reverseComp> revQueue;
 	float time;
 
 	/*MPI*/
