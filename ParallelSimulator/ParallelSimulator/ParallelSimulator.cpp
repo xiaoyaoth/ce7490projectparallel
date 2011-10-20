@@ -17,6 +17,7 @@ using namespace std;
 void initializeEnv(MPI_Datatype &t);
 void test(int rank);
 void test2(int rank, int size);
+void test3(int rank, int size);
 
 void main(int argc, char* argv[]){
 	int procsAmount, myRank;
@@ -27,10 +28,10 @@ void main(int argc, char* argv[]){
 	MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 	initializeEnv(mpiType);
 
-	Process p(procsAmount, myRank, mpiType);
-	p.run();
+	//Process p(procsAmount, myRank, mpiType); p.run();
 	//test(myRank);
 	//test2(myRank, procsAmount);
+	test3(myRank, procsAmount);
 
 	MPI_Type_free(&mpiType);
 	MPI_Finalize();
@@ -80,3 +81,13 @@ void test2(int rank, int size){
 		cout<<r[i]<<endl;
 }
 
+void test3(int rank, int size){
+	MPI_Status stat;
+	int s = rank;
+	if(rank == 0){
+		s = 2010;
+		MPI_Bcast(&s, 1, MPI_INT, 1, MPI_COMM_WORLD);
+	}else
+	MPI_Recv(&s, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+	cout<<s<<endl;
+}

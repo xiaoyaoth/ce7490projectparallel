@@ -12,7 +12,6 @@ int Process::baseAmount = 0;
 int Process::procAmount = 0;
 int Process::pid = 0;
 priority_queue<Event*, vector<Event*>, comp> Process::queue;
-priority_queue<Event*, vector<Event*>, reverseComp> Process::revQueue;
 list<struct eventStruct> Process::sendList;
 
 using namespace std;
@@ -125,6 +124,7 @@ void Process::run(){
 
 	int j = 0;
 	int eventCount = 0;
+	int loopCount = 0;
 	bool fini = false; //current process fini
 	bool prevFini = false; // previous process has finished;
 
@@ -149,11 +149,7 @@ void Process::run(){
 		} else
 			ret = FINI;
 		sendMessage();
-		//if(pid != 0) // this is not correct
 		ret = recvMessage();
-		/* this condition is specially designed for process 0 (pid == 0) 
-		(pid == 0 && queue.size() == 0 && sendList.size() == 0 && (fin.eof()||j>=500))
-		READAMOUNT is used for debug*/
 		if(ret == FINI || (pid == 0 && queue.size() == 0 && sendList.size() == 0 && (fin.eof()||j>=READAMOUNT))){
 			prevFini = true;
 		}
@@ -172,23 +168,24 @@ void Process::run(){
 			fout<<blist[cur->getBlistIndex()].toString()<<endl;
 			if(cur->getTime()>time)
 				time = cur->getTime();			
-			revQueue.push(cur);
 			cur->handleEvent(blist);
 			//cout<<cur->toString()<<endl;
 
 			eventCount++;
 			if(eventCount%FREQ == 0){
-				cout<<"eventCount%FREQ == 0"<<endl;
+				//cout<<"eventCount%FREQ == 0"<<endl;
 				for(int i = 0; i<baseAmount; i++)
 					blist[i].saveState(time);
 			}
 		}
-		if(eventCount&FREQ == 0){
+		if(loopCount%(FREQ*10) == 0){
+			cout<<"loopCount%FREQ == 0"<<endl;
 			MPI_Allgather(&time, 1, MPI_FLOAT, procTime, 1, MPI_FLOAT, MPI_COMM_WORLD);
 			for(int i = 0; i<procAmount; i++)
-				cout<<procTime[i];
+				cout<<procTime[i]<<" ";
 			cout<<endl;
 		}
+		loopCount++;
 		//cout<<queue.size()<<" ";
 	}
 	//for(int i = 0; i<baseAmount; i++)
