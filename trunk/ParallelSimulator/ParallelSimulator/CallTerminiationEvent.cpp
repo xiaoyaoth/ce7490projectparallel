@@ -44,6 +44,9 @@ void CallTerminationEvent::scheme1(Base blist[]){
 	return;
 }
 
+void CallTerminationEvent::redo(Base * blist){
+}
+
 string CallTerminationEvent::toString(){
 	stringstream ss;
 	ss<<"ano:"<<arrivalNo<<"Termi\t\t"<<time<<"\t"<<baseId;

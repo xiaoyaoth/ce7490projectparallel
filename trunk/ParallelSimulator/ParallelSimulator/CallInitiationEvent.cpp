@@ -81,6 +81,22 @@ void CallInitiationEvent::scheme1(Base blist[]){
 	return;
 }
 
+void CallInitiationEvent::redo(Base blist[]){
+	/*redo do nonthing to the effects that will happen anyway, 
+		however, it will cancel the effects of event which should
+		not appear when stagger message inserted*/
+	int rc = 0;//prevCallReserved is 0 in scheme 0;
+	int bid = getBaseID();
+	int bidx = getBlistIndex();
+	Base *base = &blist[bidx];
+	int oc = base->getOccupiedChannel(); //occupied channel 
+	if(oc<10)
+		//do nothing affecting other processes, because this effect will happen any way
+		base->incOccupiedChannel();
+	else
+		;
+}
+
 string CallInitiationEvent::toString(){
 	stringstream ss;
 

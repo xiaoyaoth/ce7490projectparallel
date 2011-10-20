@@ -28,6 +28,10 @@ void Event::handleEvent(Base blist[]){
 	std::cout<<"general func of handling event"<<std::endl;
 }
 
+void Event::redo(Base blist[]){
+	std::cout<<"general func of reverse Execution"<<std::endl;
+}
+
 string Event::toString(){
 	stringstream ss;
 	ss<<"vitual"<<"\t"<<time<<"\t"<<std::endl;
