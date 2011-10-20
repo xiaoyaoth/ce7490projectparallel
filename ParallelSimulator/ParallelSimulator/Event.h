@@ -46,6 +46,7 @@ public:
 	int getArrivalNo();
 
 	virtual void handleEvent(Base blist[]);
+	virtual void redo(Base blist[]);
 	virtual string toString();
 	static string getResult();
 

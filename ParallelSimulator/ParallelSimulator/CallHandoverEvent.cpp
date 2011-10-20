@@ -106,6 +106,9 @@ void CallHandoverEvent::scheme1(Base * blist){
 	return;
 }
 
+void CallHandoverEvent::redo(Base * blist){
+}
+
 string CallHandoverEvent::toString(){
 	stringstream ss;
 

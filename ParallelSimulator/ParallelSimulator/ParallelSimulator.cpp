@@ -16,6 +16,7 @@ using namespace std;
 
 void initializeEnv(MPI_Datatype &t);
 void test(int rank);
+void test2(int rank, int size);
 
 void main(int argc, char* argv[]){
 	int procsAmount, myRank;
@@ -29,6 +30,7 @@ void main(int argc, char* argv[]){
 	Process p(procsAmount, myRank, mpiType);
 	p.run();
 	//test(myRank);
+	//test2(myRank, procsAmount);
 
 	MPI_Type_free(&mpiType);
 	MPI_Finalize();
@@ -68,5 +70,13 @@ void test(int rank){
 		MPI_Recv(&j, 1, MPI_INT, 0, 99, MPI_COMM_WORLD, &stat);
 		cout<<"i:"<<i<<" j:"<<j<<endl;
 	}
+}
+
+void test2(int rank, int size){
+	MPI_Status stat;
+	int * r = new int[size];
+	MPI_Allgather(&rank, 1, MPI_INT, r, 1, MPI_INT, MPI_COMM_WORLD);
+	for(int i = 0; i<4; i++)
+		cout<<r[i]<<endl;
 }
 

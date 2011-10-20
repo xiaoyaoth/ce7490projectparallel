@@ -128,6 +128,8 @@ void Process::run(){
 	bool fini = false; //current process fini
 	bool prevFini = false; // previous process has finished;
 
+	float *procTime = new float[procAmount];
+
 	if(pid == 0){
 		fin.open("C:\\Users\\xli15\\Documents\\Visual Studio 2010\\Projects\\ParallelSimulator\\ParallelSimulator\\data.txt");
 		if(!fin)
@@ -136,26 +138,22 @@ void Process::run(){
 
 	const int READAMOUNT = 500;
 	while(!fini){
-		if(pid == 0 && !fin.eof() && ++j<READAMOUNT){
+		if(pid == 0 && !fin.eof()){
 			struct eventStruct e;
 			getline(fin, rec);
 			e =  parseData(rec);
-			//cout<<e.ano<<" "<<e.getBaseID()/baseAmount<<" "
-				//<<e.getBaseID()<<" "<<baseAmount<<endl;
-			if(e.bid<baseAmount){
+			if(e.bid<baseAmount)
 				this->insert(new CallInitiationEvent(e));
-			}
-			else{
+			else
 				sendList.push_back(e);
-			}
 		} else
 			ret = FINI;
 		sendMessage();
 		//if(pid != 0) // this is not correct
 		ret = recvMessage();
 		/* this condition is specially designed for process 0 (pid == 0) 
-		  (pid == 0 && queue.size() == 0 && sendList.size() == 0 && (fin.eof()||j>=500))
-		  READAMOUNT is used for debug*/
+		(pid == 0 && queue.size() == 0 && sendList.size() == 0 && (fin.eof()||j>=500))
+		READAMOUNT is used for debug*/
 		if(ret == FINI || (pid == 0 && queue.size() == 0 && sendList.size() == 0 && (fin.eof()||j>=READAMOUNT))){
 			prevFini = true;
 		}
@@ -176,18 +174,26 @@ void Process::run(){
 				time = cur->getTime();			
 			revQueue.push(cur);
 			cur->handleEvent(blist);
-			cout<<cur->toString()<<endl;
+			//cout<<cur->toString()<<endl;
 
 			eventCount++;
 			if(eventCount%FREQ == 0){
+				cout<<"eventCount%FREQ == 0"<<endl;
 				for(int i = 0; i<baseAmount; i++)
 					blist[i].saveState(time);
 			}
 		}
+		if(eventCount&FREQ == 0){
+			MPI_Allgather(&time, 1, MPI_FLOAT, procTime, 1, MPI_FLOAT, MPI_COMM_WORLD);
+			for(int i = 0; i<procAmount; i++)
+				cout<<procTime[i];
+			cout<<endl;
+		}
+		//cout<<queue.size()<<" ";
 	}
-	for(int i = 0; i<baseAmount; i++)
-		cout<<blist[i].printStateList()<<endl;
-	cout<<"finish run"<<endl;
+	//for(int i = 0; i<baseAmount; i++)
+	//cout<<blist[i].printStateList()<<endl;
+	cout<<pid<<" finish run"<<endl;
 }
 
 void Process::sendMessage(){

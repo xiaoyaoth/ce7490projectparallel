@@ -15,6 +15,7 @@ public:
 	void handleEvent(Base blist[]);
 	void scheme0(Base blist[]);
 	void scheme1(Base blist[]);
+	void redo(Base blist[]);
 	string toString();
 };
 #endif
