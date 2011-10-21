@@ -19,7 +19,7 @@ private:
 	/*logic*/
 	Base * blist;	
 	static priority_queue<Event*, vector<Event*>, comp> queue;
-	float time;
+	float procTime;
 
 	/*MPI*/
 	static int baseAmount; // base amount in every process

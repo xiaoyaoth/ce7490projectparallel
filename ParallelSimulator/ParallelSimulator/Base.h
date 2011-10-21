@@ -28,7 +28,6 @@ private:
 	int occupiedChannel;
 	bool reservedChannelOccupied; // added for the second scheme
 	int baseID;
-	list<struct baseState> stateList;
 public:
 	Base(); 
 	Base(int bid);
