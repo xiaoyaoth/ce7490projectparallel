@@ -19,10 +19,13 @@ CallTerminationEvent::CallTerminationEvent(struct eventStruct e)
 }
 
 void CallTerminationEvent::handleEvent(Base blist[]){
-	if(SCHEME == 0)
-		scheme0(blist);
-	else
-		scheme1(blist);
+	int baseID = getBlistIndex();
+	Base * base = &blist[baseID];
+	base->decOccupiedChannel();
+	if(SCHEME == 1 && prevCallReserved == true)
+		base->toggleReservation();
+	Event::success++;
+	return;
 }
 
 void CallTerminationEvent::scheme0(Base blist[]){
