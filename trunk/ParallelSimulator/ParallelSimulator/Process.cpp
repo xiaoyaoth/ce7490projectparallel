@@ -12,10 +12,10 @@ int Process::baseAmount = 0;
 int Process::procAmount = 0;
 int Process::pid = 0;
 float Process::procTime;
-priority_queue<Event*, vector<Event*>, comp> Process::queue;
 priority_queue<Event*, vector<Event*>, comp> Process::initQueue;
 priority_queue<Event*, vector<Event*>, comp> Process::handQueue;
-list<struct eventStruct> Process::sendList;
+priority_queue<struct eventStruct, vector<struct eventStruct>, comp2> Process::sendList;
+bool Process::prevFini = false;
 
 using namespace std;
 
@@ -40,26 +40,58 @@ Process::Process(int pno, int rank, MPI_Datatype t){
 			blist[i].setBaseID(-1);
 		cout<<blist[i].getBaseID()<<endl;
 	}
-	queue.empty();
 	procTime = 0;
 }
 
 void Process::insert(Event * e){
-	queue.push(e);
+	initQueue.push(e);
 }
 
 Event * Process::getNextEvent(){
 	Event * e;
-	if(queue.size() != 0){
-		e = queue.top();
-		queue.pop();
-	} else
-		e = NULL;
+	int hs = handQueue.size();
+	int is = initQueue.size();
+//	cout<<"initQueue:"<<is<<" handQueue:"<<hs;
+	//if(queue.size() != 0){
+	//	e = queue.top();
+	//	queue.pop();
+	//} else
+	//	e = NULL;
+	if(pid != 0){
+		if(hs != 0 && is != 0){
+			Event * e1 = handQueue.top();
+			Event * e2 = initQueue.top();
+			if(e1->getTime()<e2->getTime()){
+				e = e1;
+				handQueue.pop();
+			} else {
+				e = e2;
+				initQueue.pop();
+			}
+		}else if (prevFini == true && hs+is != 0){
+			if(hs > 0){
+				e = handQueue.top();
+				handQueue.pop();
+			} else {
+				e = initQueue.top();
+				initQueue.pop();
+			}
+		} else
+			e = NULL;
+	} else {
+		if(is > 0){
+			e = initQueue.top();
+			initQueue.pop();
+		} else {
+			prevFini = true;
+			e = NULL;
+		}
+	}
 	return e;
 }
 
 int Process::getQueueSize(){
-	return queue.size();
+	return -1;
 }
 
 struct eventStruct Process::parseData(string rec){
@@ -108,7 +140,7 @@ int Process::getPid(){
 }
 
 void Process::insertSendList(struct eventStruct e){
-	sendList.push_back(e);
+	sendList.push(e);
 }
 
 void Process::run(){
@@ -123,26 +155,26 @@ void Process::run(){
 	int j = 0;
 	int i = 0;
 	bool fini = false; //current process fini
-	bool prevFini = false; // previous process has finished;
+	bool pf = false; // previous process has finished;
 
-	const int READAMOUNT = 500;
+	//const int READAMOUNT = 500;
 	if(pid == 0){
 		fin.open("C:\\Users\\xli15\\Documents\\Visual Studio 2010\\Projects\\ParallelSimulator\\ParallelSimulator\\data.txt");
 		if(!fin)
 			cout<<"file not exist"<<endl;
 		struct eventStruct e;
-		while(!fin.eof() && ++i<READAMOUNT){
+		while(!fin.eof()){
 			getline(fin, rec);
 			e =  parseData(rec);
 			if(e.bid<baseAmount)
-				this->insert(new CallInitiationEvent(e));
+				insert(new CallInitiationEvent(e));
 			else
-				sendList.push_back(e);
+				sendList.push(e);
 		}
 		e.etype = INITFINI;
 		for(int i = 1; i<procAmount; i++){
 			e.bid = i;
-			sendList.push_back(e);
+			sendList.push(e);
 		}
 	} else{
 		ret = recvMessage();
@@ -150,25 +182,30 @@ void Process::run(){
 			ret = recvMessage();
 	}
 
+	cout<<handQueue.size()<<" "<<initQueue.size()<<endl;
+
 	while(!fini){
 		sendMessage();
 		if(pid != 0)
 			ret = recvMessage();
-		if(ret == FINI || (pid == 0 && queue.size() == 0 && sendList.size() == 0)){
-			prevFini = true;
-		}
-		if(prevFini == true && queue.size() == 0 && sendList.size() == 0){
-			struct eventStruct e;
-			fini = true;
-			e.etype = FINI;
-			sendList.push_back(e);
-			if(pid != procAmount -1)
-				sendMessage();
-			break; // no event anymore, execution finished;
+		//if(prevFini == true || 
+		//	(pid == 0 && queue.size() == 0 && sendList.size() == 0
+		//	&& initQueue.size() == 0 && handQueue.size() == 0)){
+		//		prevFini = true;
+		//}
+		if(prevFini == true && sendList.size() == 0
+			&& initQueue.size() == 0 && handQueue.size() == 0){
+				struct eventStruct e;
+				fini = true;
+				e.etype = FINI;
+				sendList.push(e);
+				if(pid != procAmount -1)
+					sendMessage();
+				break; // no event anymore, execution finished;
 		}
 		Event * cur = getNextEvent();
 		if(cur != NULL){
-			fout<<cur->toString()<<endl;
+			fout<<cur->toString()<<"hs:"<<handQueue.size()<<" is:"<<initQueue.size()<<endl;
 			//fout<<blist[cur->getBlistIndex()].toString()<<endl;
 			if(cur->getTime()>=procTime)
 				procTime = cur->getTime();
@@ -184,17 +221,17 @@ void Process::sendMessage(){
 	MPI_Status stat;
 	if(sendFlag == true && sendList.size()>0){
 		int dest = -1;
-		struct eventStruct e = sendList.front();
+		struct eventStruct e = sendList.top();
 		if(e.etype == INIT){
-			sendList.pop_front();
+			sendList.pop();
 			dest = (int)e.bid/baseAmount;
 			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
 		} else if((e.etype == FINI && pid+1<procAmount) || (e.etype == HANDO && e.time<procTime)){
-			sendList.pop_front();
+			sendList.pop();
 			dest = pid+1;
 			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
 		} else if(e.etype == INITFINI){
-			sendList.pop_front();
+			sendList.pop();
 			dest = e.bid;
 			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
 		} else 
@@ -213,7 +250,7 @@ int Process::recvMessage(){ // rollback should happens here
 	if(recvFlag == true){
 		//cout<<recvElem.toString()<<endl;
 		if(recvElem.etype == FINI)
-			return FINI;
+			prevFini = true;
 		else if(recvElem.etype == HANDO)
 			handQueue.push(new CallHandoverEvent(recvElem));
 		else if(recvElem.etype == INIT)
@@ -225,16 +262,20 @@ int Process::recvMessage(){ // rollback should happens here
 		else
 			cout<<"recv something else"<<recvElem.toString()<<endl;
 	}
-	while(handQueue.size()>0 && initQueue.size()>0){
-		Event * e1 = handQueue.top();
-		Event * e2 = initQueue.top();
-		if(e1->getTime()<e2->getTime()){
-			queue.push(e1);
-			handQueue.pop();
-		}else{
-			queue.push(e2);
-			initQueue.pop();
-		}
-	}
+	//while(handQueue.size()>0 && initQueue.size()>0){
+	//	Event * e1 = handQueue.top();
+	//	Event * e2 = initQueue.top();
+	//	if(e1->getTime()<e2->getTime()){
+	//		queue.push(e1);
+	//		handQueue.pop();
+	//	}else{
+	//		queue.push(e2);
+	//		initQueue.pop();
+	//	}
+	//}
 	return 0;
+}
+
+bool Process::queuesClean(){
+	return (initQueue.size() == 0 && handQueue.size() == 0);
 }

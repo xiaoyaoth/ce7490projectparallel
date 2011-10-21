@@ -14,11 +14,16 @@ struct comp{
 	}
 };
 
+struct comp2{
+	bool operator() (eventStruct e1, eventStruct e2){
+		return e1.time>e2.time;
+	}
+};
+
 class Process{
 private:
 	/*logic*/
 	Base * blist;	
-	static priority_queue<Event*, vector<Event*>, comp> queue;
 
 	/*MPI*/
 	static int baseAmount; // base amount in every process
@@ -29,11 +34,13 @@ private:
 	MPI_Request recvReq;
 	int sendFlag;
 	int recvFlag;
-	static list<struct eventStruct> sendList;
+	static priority_queue<struct eventStruct, vector<struct eventStruct>, comp2> sendList;
+	//static list<struct eventStruct> sendList;
 	static priority_queue<Event*, vector<Event*>, comp> initQueue;
 	static priority_queue<Event*, vector<Event*>, comp> handQueue;
 	struct eventStruct recvElem;
 	static float procTime;
+	static bool prevFini;
 
 public:
 	/*initiation*/
@@ -55,6 +62,7 @@ public:
 	static int getProcAmount();
 	static int getPid();
 	static void insertSendList(struct eventStruct e);
+	bool queuesClean();
 };
 
 #endif;
