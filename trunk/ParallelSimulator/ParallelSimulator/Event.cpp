@@ -7,7 +7,7 @@ int Event::success = 0;
 int Event::block = 0;
 
 Event::Event(float t, int bid, int ano){
-	time = t;
+	time = t; 
 	baseId = bid;
 	arrivalNo = ano;
 }

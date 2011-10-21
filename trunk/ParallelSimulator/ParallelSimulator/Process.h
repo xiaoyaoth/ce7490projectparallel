@@ -31,7 +31,10 @@ private:
 	int sendFlag;
 	int recvFlag;
 	static list<struct eventStruct> sendList;
+	static priority_queue<Event*, vector<Event*>, comp> initQueue;
+	static priority_queue<Event*, vector<Event*>, comp> handQueue;
 	struct eventStruct recvElem;
+	static float procTime;
 
 public:
 	/*initiation*/

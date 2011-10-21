@@ -34,7 +34,7 @@ void main(int argc, char* argv[]){
 	test3(myRank, procsAmount);
 
 	MPI_Type_free(&mpiType);
-	MPI_Finalize();
+	MPI_Finalize(); 
 }
 
 void initializeEnv(MPI_Datatype &t)

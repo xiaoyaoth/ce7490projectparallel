@@ -6,7 +6,7 @@
 class CallHandoverEvent : public Event
 {
 private:
-	float speed;
+	float speed; 
 	float duration;
 	bool prevCallReserved; // added for the second scheme
 public:

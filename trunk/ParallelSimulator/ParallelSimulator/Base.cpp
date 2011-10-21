@@ -1,7 +1,7 @@
 #include "Base.h"
 
 Base::Base(){
-	baseID = 0;
+	baseID = 0; 
 	occupiedChannel = 0;
 	reservedChannelOccupied = false;
 }

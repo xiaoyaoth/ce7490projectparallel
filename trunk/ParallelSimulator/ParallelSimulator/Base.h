@@ -30,7 +30,7 @@ private:
 	int baseID;
 	list<struct baseState> stateList;
 public:
-	Base();
+	Base(); 
 	Base(int bid);
 
 	int getBaseID();

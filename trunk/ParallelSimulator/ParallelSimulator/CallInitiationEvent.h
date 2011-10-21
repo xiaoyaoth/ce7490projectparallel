@@ -6,7 +6,7 @@
 class CallInitiationEvent : public Event
 {
 private:
-	float posInBase;
+	float posInBase; 
 	float speed;
 	float duration;
 public:

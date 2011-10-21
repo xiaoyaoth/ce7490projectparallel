@@ -12,7 +12,6 @@
 #define HANDO 1
 #define TERMI 2
 #define FINI 3
-#define DECPREV 4
 
 #define INTNO 4
 #define FLOATNO 4

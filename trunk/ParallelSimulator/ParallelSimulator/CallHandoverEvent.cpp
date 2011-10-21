@@ -39,24 +39,13 @@ void CallHandoverEvent::scheme0(Base * blist){
 	int bid = getBaseID();
 	int bidx = getBlistIndex();
 	Base *base = &blist[bidx];
-	if(bidx>0){
-		Base *prevBase = &blist[bidx-1];
-		prevBase->decOccupiedChannel();
-	} else{
-		struct eventStruct e;
-		e.etype = DECPREV;
-		e.bid = bid-1;
-		e.rc = 0;
-		e.time = time;
-		insertIntoSendList(e);
-	}
 	int oc = base->getOccupiedChannel(); //occupied channel amount
 	if(oc<10){//not all the channel occupied
 		base->incOccupiedChannel();
 		float handoverTS = time+3600*DIAMETER/speed;
 		float terminationTS = time + duration;
-		if(handoverTS<terminationTS)
-			if(baseId+1<20)
+		if(handoverTS<terminationTS){
+			if(baseId+1<20){
 				if(bidx+1<getBlistSize()){
 					CallHandoverEvent * ev = new CallHandoverEvent(handoverTS, 
 						speed, baseId+1, terminationTS-handoverTS, arrivalNo);
@@ -66,9 +55,9 @@ void CallHandoverEvent::scheme0(Base * blist){
 						terminationTS-handoverTS, bid+1, rc, speed, handoverTS);
 					insertIntoSendList(es);
 				}
-			else
-				insertIntoEventQueue(new CallTerminationEvent(handoverTS, baseId, arrivalNo));
-		else
+			}
+			insertIntoEventQueue(new CallTerminationEvent(handoverTS, baseId, arrivalNo));
+		} else
 			insertIntoEventQueue(new CallTerminationEvent(terminationTS, baseId, arrivalNo));
 	}else //all the channel occupied
 		Event::drop++;
