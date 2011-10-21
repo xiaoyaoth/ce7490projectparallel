@@ -8,6 +8,7 @@
 #include <random>
 #include <time.h>
 #include <iostream>
+#include <list>
 
 #include "Process.h"
 
@@ -28,10 +29,11 @@ void main(int argc, char* argv[]){
 	MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 	initializeEnv(mpiType);
 
-	//Process p(procsAmount, myRank, mpiType); p.run();
+	Process p(procsAmount, myRank, mpiType); p.run();
 	//test(myRank);
 	//test2(myRank, procsAmount);
-	test3(myRank, procsAmount);
+	//test3(myRank, procsAmount);
+	
 
 	MPI_Type_free(&mpiType);
 	MPI_Finalize(); 

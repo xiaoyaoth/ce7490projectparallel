@@ -49,7 +49,7 @@ void CallTerminationEvent::scheme1(Base blist[]){
 
 string CallTerminationEvent::toString(){
 	stringstream ss;
-	ss<<"ano:"<<arrivalNo<<"Termi\t\t"<<time<<"\t"<<baseId;
+	ss<<"ano:"<<arrivalNo<<"T\ermi\t\t"<<time<<"\t"<<baseId;
 	
 	//ss<<"t "<<prevCallReserved<<"\t"<<time
 		//<<"\t"<<arrivalNo<<"\t";

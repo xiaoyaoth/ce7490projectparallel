@@ -19,7 +19,6 @@ private:
 	/*logic*/
 	Base * blist;	
 	static priority_queue<Event*, vector<Event*>, comp> queue;
-	float procTime;
 
 	/*MPI*/
 	static int baseAmount; // base amount in every process
@@ -52,7 +51,6 @@ public:
 	/*MPI operation*/
 	void sendMessage();
 	int recvMessage();
-	void rollback();
 	static int getBaseAmount();
 	static int getProcAmount();
 	static int getPid();

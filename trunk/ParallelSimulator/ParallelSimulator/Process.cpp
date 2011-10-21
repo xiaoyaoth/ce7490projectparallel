@@ -11,6 +11,7 @@
 int Process::baseAmount = 0;
 int Process::procAmount = 0;
 int Process::pid = 0;
+float Process::procTime;
 priority_queue<Event*, vector<Event*>, comp> Process::queue;
 priority_queue<Event*, vector<Event*>, comp> Process::initQueue;
 priority_queue<Event*, vector<Event*>, comp> Process::handQueue;
@@ -40,7 +41,7 @@ Process::Process(int pno, int rank, MPI_Datatype t){
 		cout<<blist[i].getBaseID()<<endl;
 	}
 	queue.empty();
-	time = 0;
+	procTime = 0;
 }
 
 void Process::insert(Event * e){
@@ -120,29 +121,40 @@ void Process::run(){
 	ofstream fout(ss.str().c_str());
 
 	int j = 0;
+	int i = 0;
 	bool fini = false; //current process fini
 	bool prevFini = false; // previous process has finished;
 
+	const int READAMOUNT = 500;
 	if(pid == 0){
 		fin.open("C:\\Users\\xli15\\Documents\\Visual Studio 2010\\Projects\\ParallelSimulator\\ParallelSimulator\\data.txt");
 		if(!fin)
 			cout<<"file not exist"<<endl;
-	}
-	const int READAMOUNT = 500;
-	while(!fini){
-		if(pid == 0 && !fin.eof()){
-			struct eventStruct e;
+		struct eventStruct e;
+		while(!fin.eof() && ++i<READAMOUNT){
 			getline(fin, rec);
 			e =  parseData(rec);
 			if(e.bid<baseAmount)
 				this->insert(new CallInitiationEvent(e));
 			else
 				sendList.push_back(e);
-		} else
-			ret = FINI;
-		sendMessage();
+		}
+		e.etype = INITFINI;
+		for(int i = 1; i<procAmount; i++){
+			e.bid = i;
+			sendList.push_back(e);
+		}
+	} else{
 		ret = recvMessage();
-		if(ret == FINI || (pid == 0 && queue.size() == 0 && sendList.size() == 0 && (fin.eof()||j>=READAMOUNT))){
+		while(ret!=INITFINI)
+			ret = recvMessage();
+	}
+
+	while(!fini){
+		sendMessage();
+		if(pid != 0)
+			ret = recvMessage();
+		if(ret == FINI || (pid == 0 && queue.size() == 0 && sendList.size() == 0)){
 			prevFini = true;
 		}
 		if(prevFini == true && queue.size() == 0 && sendList.size() == 0){
@@ -156,10 +168,12 @@ void Process::run(){
 		}
 		Event * cur = getNextEvent();
 		if(cur != NULL){
-			fout<<cur->toString()<<"\t";
-			fout<<blist[cur->getBlistIndex()].toString()<<endl;
-			if(cur->getTime()>procTime)
-				procTime = cur->getTime();			
+			fout<<cur->toString()<<endl;
+			//fout<<blist[cur->getBlistIndex()].toString()<<endl;
+			if(cur->getTime()>=procTime)
+				procTime = cur->getTime();
+			else
+				fout<<"cur->getTime()<procTime"<<cur->getTime()<<" "<<procTime<<endl;
 			cur->handleEvent(blist);
 		}
 	}
@@ -169,18 +183,22 @@ void Process::run(){
 void Process::sendMessage(){
 	MPI_Status stat;
 	if(sendFlag == true && sendList.size()>0){
-		struct eventStruct e = sendList.front();
-		sendList.pop_front();
 		int dest = -1;
-
-		if(e.etype == INIT)
+		struct eventStruct e = sendList.front();
+		if(e.etype == INIT){
+			sendList.pop_front();
 			dest = (int)e.bid/baseAmount;
-		else
-			dest = pid+1;
-		if(dest>=procAmount)
-			e.toString(); /*debug*/
-		else
 			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
+		} else if((e.etype == FINI && pid+1<procAmount) || (e.etype == HANDO && e.time<procTime)){
+			sendList.pop_front();
+			dest = pid+1;
+			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
+		} else if(e.etype == INITFINI){
+			sendList.pop_front();
+			dest = e.bid;
+			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
+		} else 
+			cout<<"sendMessage "<<e.toString()<<endl;
 	}
 	MPI_Test(&sendReq, &sendFlag, &stat);
 }
@@ -193,19 +211,30 @@ int Process::recvMessage(){ // rollback should happens here
 	}
 	MPI_Test(&recvReq, &recvFlag, &stat);
 	if(recvFlag == true){
-		//recvElem.toString();
+		//cout<<recvElem.toString()<<endl;
 		if(recvElem.etype == FINI)
 			return FINI;
 		else if(recvElem.etype == HANDO)
-			this->insert(new CallHandoverEvent(recvElem));
+			handQueue.push(new CallHandoverEvent(recvElem));
 		else if(recvElem.etype == INIT)
-			this->insert(new CallInitiationEvent(recvElem));
+			initQueue.push(new CallInitiationEvent(recvElem));
 		else if(recvElem.etype == TERMI)
-			this->insert(new CallTerminationEvent(recvElem));
-		} 
-		return 0;
+			cout<<"termi received"<<endl;
+		else if(recvElem.etype == INITFINI)
+			return INITFINI;
+		else
+			cout<<"recv something else"<<recvElem.toString()<<endl;
 	}
-}
-
-void ::Process::rollback(){
+	while(handQueue.size()>0 && initQueue.size()>0){
+		Event * e1 = handQueue.top();
+		Event * e2 = initQueue.top();
+		if(e1->getTime()<e2->getTime()){
+			queue.push(e1);
+			handQueue.pop();
+		}else{
+			queue.push(e2);
+			initQueue.pop();
+		}
+	}
+	return 0;
 }
