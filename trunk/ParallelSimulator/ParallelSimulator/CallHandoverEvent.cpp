@@ -55,7 +55,7 @@ void CallHandoverEvent::scheme0(Base * blist){
 					insertIntoSendList(es);
 				}
 			}
-			insertIntoEventQueue(new CallTerminationEvent(handoverTS, baseId, arrivalNo));
+			insertIntoEventQueue(new CallTerminationEvent(handoverTS+0.0001, baseId, arrivalNo));
 		} else
 			insertIntoEventQueue(new CallTerminationEvent(terminationTS, baseId, arrivalNo));
 	}else //all the channel occupied

@@ -45,7 +45,7 @@ void CallInitiationEvent::scheme0(Base blist[]){
 				else
 					insertIntoSendList(toHandoverStruct(arrivalNo, terminationTS-handoverTS,
 					baseId+1, rc, speed, handoverTS));
-			insertIntoEventQueue(new CallTerminationEvent(handoverTS, baseId, arrivalNo));
+			insertIntoEventQueue(new CallTerminationEvent(handoverTS+0.0001, baseId, arrivalNo));
 		}
 		else
 			insertIntoEventQueue(new CallTerminationEvent(terminationTS, baseId, arrivalNo));
