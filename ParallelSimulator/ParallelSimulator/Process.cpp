@@ -211,9 +211,9 @@ void Process::run(){
 			else
 				fout<<"cur->getTime()<procTime"<<cur->getTime()<<" "<<procTime<<endl;
 			cur->handleEvent(blist);
-			fout<<cur->toString()
+			fout<<cur->toString();
 				//<<" "<<blist[cur->getBlistIndex()].toString()<<"hs:"<<handQueue.size()<<" is:"<<initQueue.size()
-				<<endl;
+				//<<endl;
 		}
 	}
 	fout<<Event::getResult();

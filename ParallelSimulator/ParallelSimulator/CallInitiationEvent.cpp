@@ -45,7 +45,9 @@ void CallInitiationEvent::scheme0(Base blist[]){
 				else
 					insertIntoSendList(toHandoverStruct(arrivalNo, terminationTS-handoverTS,
 					baseId+1, rc, speed, handoverTS));
-			insertIntoEventQueue(new CallTerminationEvent(handoverTS+0.0001, baseId, arrivalNo));
+			CallTerminationEvent *cte = new CallTerminationEvent(handoverTS, baseId, arrivalNo);
+			cte->print = false;
+			insertIntoEventQueue(cte);
 		}
 		else
 			insertIntoEventQueue(new CallTerminationEvent(terminationTS, baseId, arrivalNo));
@@ -87,7 +89,7 @@ string CallInitiationEvent::toString(){
 	//	<<baseId<<"\t"<<speed<<"\t"<<duration<<"\t"<<posInBase;
 
 	ss<<"i"<<"\t"<<time
-	<<"\t"<<arrivalNo<<"\t";
+	<<"\t"<<arrivalNo<<endl;
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();
