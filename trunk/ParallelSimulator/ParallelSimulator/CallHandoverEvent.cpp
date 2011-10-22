@@ -55,7 +55,9 @@ void CallHandoverEvent::scheme0(Base * blist){
 					insertIntoSendList(es);
 				}
 			}
-			insertIntoEventQueue(new CallTerminationEvent(handoverTS+0.0001, baseId, arrivalNo));
+			CallTerminationEvent *cte = new CallTerminationEvent(handoverTS, baseId, arrivalNo);
+			cte->print = false;
+			insertIntoEventQueue(cte);
 		} else
 			insertIntoEventQueue(new CallTerminationEvent(terminationTS, baseId, arrivalNo));
 	}else //all the channel occupied
@@ -101,7 +103,7 @@ string CallHandoverEvent::toString(){
 	//	<<"\t"<<baseId<<"\t"<<speed<<"\t"<<duration;
 
 	ss<<"h "<<this->prevCallReserved<<"\t"<<time
-	<<"\t"<<arrivalNo<<"\t";
+	<<"\t"<<arrivalNo<<endl;
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();
