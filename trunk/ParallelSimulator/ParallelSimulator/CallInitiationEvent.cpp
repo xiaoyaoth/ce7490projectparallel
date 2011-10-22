@@ -27,7 +27,6 @@ void CallInitiationEvent::handleEvent(Base blist[]){
 
 void CallInitiationEvent::scheme0(Base blist[]){
 	int rc = 0;//prevCallReserved is 0 in scheme 0;
-	int bid = getBaseID();
 	int bidx = getBlistIndex();
 	Base *base = &blist[bidx];
 	int oc = base->getOccupiedChannel(); //occupied channel 
@@ -37,19 +36,19 @@ void CallInitiationEvent::scheme0(Base blist[]){
 		float handoverTS = time + 3600*(DIAMETER-posInBase)/speed;
 		float terminationTS = time + duration;
 		if(handoverTS<terminationTS){
-			if(bid+1<20)
+			if(baseId+1<20)
 				if(bidx+1<getBlistSize()){
 					CallHandoverEvent *ev = new CallHandoverEvent(handoverTS, 
-						speed, bid+1, terminationTS-handoverTS, arrivalNo);
+						speed, baseId+1, terminationTS-handoverTS, arrivalNo);
 					insertIntoEventQueue(ev);
 				}
 				else
 					insertIntoSendList(toHandoverStruct(arrivalNo, terminationTS-handoverTS,
-					bid+1, rc, speed, handoverTS));
-			insertIntoEventQueue(new CallTerminationEvent(handoverTS, bid, arrivalNo));
+					baseId+1, rc, speed, handoverTS));
+			insertIntoEventQueue(new CallTerminationEvent(handoverTS, baseId, arrivalNo));
 		}
 		else
-			insertIntoEventQueue(new CallTerminationEvent(terminationTS, bid, arrivalNo));
+			insertIntoEventQueue(new CallTerminationEvent(terminationTS, baseId, arrivalNo));
 	}else
 		Event::block++;
 	return;
@@ -84,11 +83,11 @@ void CallInitiationEvent::scheme1(Base blist[]){
 string CallInitiationEvent::toString(){
 	stringstream ss;
 
-	ss<<"ano:"<<arrivalNo<<"\tInit\t"<<arrivalNo<<"\t"<<time<<"\t"
-		<<baseId<<"\t"<<speed<<"\t"<<duration<<"\t"<<posInBase;
+	//ss<<"ano:"<<arrivalNo<<"\tInit\t"<<time<<"\t"
+	//	<<baseId<<"\t"<<speed<<"\t"<<duration<<"\t"<<posInBase;
 
-	//ss<<"i"<<"\t"<<time
-	//<<"\t"<<arrivalNo<<"\t";
+	ss<<"i"<<"\t"<<time
+	<<"\t"<<arrivalNo<<"\t";
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();
