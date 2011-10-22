@@ -36,7 +36,6 @@ void CallHandoverEvent::handleEvent(Base blist[]){
 
 void CallHandoverEvent::scheme0(Base * blist){
 	int rc = 0;//prevCallReserved is 0 in scheme 0;
-	int bid = getBaseID();
 	int bidx = getBlistIndex();
 	Base *base = &blist[bidx];
 	int oc = base->getOccupiedChannel(); //occupied channel amount
@@ -52,7 +51,7 @@ void CallHandoverEvent::scheme0(Base * blist){
 					insertIntoEventQueue(ev);
 				} else {
 					struct eventStruct es = toHandoverStruct(arrivalNo, 
-						terminationTS-handoverTS, bid+1, rc, speed, handoverTS);
+						terminationTS-handoverTS, baseId+1, rc, speed, handoverTS);
 					insertIntoSendList(es);
 				}
 			}
@@ -98,11 +97,11 @@ void CallHandoverEvent::scheme1(Base * blist){
 string CallHandoverEvent::toString(){
 	stringstream ss;
 
-	ss<<"ano:"<<arrivalNo<<"\tHando\t\t"<<time
-		<<"\t"<<baseId<<"\t"<<speed<<"\t"<<duration;
+	//ss<<"ano:"<<arrivalNo<<"\tHando\t\t"<<time
+	//	<<"\t"<<baseId<<"\t"<<speed<<"\t"<<duration;
 
-	//ss<<"h "<<this->prevCallReserved<<"\t"<<time
-	//<<"\t"<<arrivalNo<<"\t";
+	ss<<"h "<<this->prevCallReserved<<"\t"<<time
+	<<"\t"<<arrivalNo<<"\t";
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();
