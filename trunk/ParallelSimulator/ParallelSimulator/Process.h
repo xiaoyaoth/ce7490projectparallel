@@ -6,7 +6,6 @@
 #include "Event.h"
 #include <queue>
 #include <list>
-#include <fstream>
 
 struct comp{
 	bool operator() (Event *e1, Event *e2){
@@ -54,6 +53,7 @@ public:
 	/*main logic for each process*/
 	void run();
 	struct eventStruct parseData(string rec);
+	void initialize();
 
 	/*MPI operation*/
 	void sendMessage();

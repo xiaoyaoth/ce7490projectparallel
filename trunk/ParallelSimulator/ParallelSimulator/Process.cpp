@@ -4,6 +4,7 @@
 #include "CallTerminationEvent.h"
 #include <string>
 #include <iostream>
+#include <fstream>
 
 
 #define FREQ 100 // state saving freqency
@@ -51,7 +52,7 @@ Event * Process::getNextEvent(){
 	Event * e;
 	int hs = handQueue.size();
 	int is = initQueue.size();
-//	cout<<"initQueue:"<<is<<" handQueue:"<<hs;
+	//	cout<<"initQueue:"<<is<<" handQueue:"<<hs;
 	//if(queue.size() != 0){
 	//	e = queue.top();
 	//	queue.pop();
@@ -83,7 +84,7 @@ Event * Process::getNextEvent(){
 			e = initQueue.top();
 			initQueue.pop();
 		} else {
-			prevFini = true;
+			prevFini = true; /*determine if Proc0 is prevfini*/
 			e = NULL;
 		}
 	}
@@ -127,6 +128,47 @@ struct eventStruct Process::parseData(string rec){
 	return e;
 }
 
+void Process::initialize(){
+	string rec; //one record
+	ifstream fin;
+	MPI_Status stat;
+	if(pid == 0){
+		fin.open("C:\\Users\\xli15\\Documents\\Visual Studio 2010\\Projects\\ParallelSimulator\\ParallelSimulator\\data.txt");
+		if(!fin)
+			cout<<"file not exist"<<endl;
+		while(!fin.eof()){
+			struct eventStruct e;
+			getline(fin, rec);
+			e =  parseData(rec);
+			int dest = (int)e.bid/baseAmount;
+			if(e.bid<baseAmount)
+				insert(new CallInitiationEvent(e));
+			else
+				MPI_Send(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD);
+		}
+		for(int i = 1; i<procAmount; i++){
+			struct eventStruct e;
+			e.etype = INITFINI;
+			e.bid = i;
+			e.time = FLT_MAX;
+			MPI_Send(&e, 1, mpiType, e.bid, 99, MPI_COMM_WORLD);
+		}
+		cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
+	} else{
+		while(true){
+			struct eventStruct e;
+			MPI_Recv(&e, 1, mpiType, 0, 99, MPI_COMM_WORLD, &stat);
+			if(e.etype == INIT)
+				initQueue.push(new CallInitiationEvent(e));
+			else if(e.etype == INITFINI)
+				break;
+			else
+				cout<<"initialize wrong"<<e.toString();
+		}
+		cout<<"init recv fini"<<endl;
+	}
+}
+
 int Process::getBaseAmount(){
 	return baseAmount;
 }
@@ -144,9 +186,6 @@ void Process::insertSendList(struct eventStruct e){
 }
 
 void Process::run(){
-	int ret = 0; //received event type
-	string rec; //one record
-	ifstream fin;
 
 	stringstream ss;
 	ss<<pid<<".txt";
@@ -154,48 +193,17 @@ void Process::run(){
 
 	int j = 0;
 	int i = 0;
+	int ret = -1;
 	bool fini = false; //current process fini
-	bool pf = false; // previous process has finished;
 
-	//const int READAMOUNT = 500;
-	if(pid == 0){
-		fin.open("C:\\Users\\xli15\\Documents\\Visual Studio 2010\\Projects\\ParallelSimulator\\ParallelSimulator\\data.txt");
-		if(!fin)
-			cout<<"file not exist"<<endl;
-		struct eventStruct e;
-		while(!fin.eof()){
-			getline(fin, rec);
-			e =  parseData(rec);
-			if(e.bid<baseAmount)
-				insert(new CallInitiationEvent(e));
-			else
-				sendList.push(e);
-		}
-		e.etype = INITFINI;
-		for(int i = 1; i<procAmount; i++){
-			e.bid = i;
-			sendList.push(e);
-		}
-		cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
-		while(sendList.size()>0)
-			sendMessage();
-	} else{
-		ret = recvMessage();
-		while(ret!=INITFINI)
-			ret = recvMessage();
-	}
-
+	initialize();
 	cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
 
+	
 	while(!fini){
 		sendMessage();
 		if(pid != 0)
 			ret = recvMessage();
-		//if(prevFini == true || 
-		//	(pid == 0 && queue.size() == 0 && sendList.size() == 0
-		//	&& initQueue.size() == 0 && handQueue.size() == 0)){
-		//		prevFini = true;
-		//}
 		if(prevFini == true && sendList.size() == 0
 			&& initQueue.size() == 0 && handQueue.size() == 0){
 				struct eventStruct e;
@@ -208,7 +216,6 @@ void Process::run(){
 		}
 		Event * cur = getNextEvent();
 		if(cur != NULL){
-			//fout<<blist[cur->getBlistIndex()].toString()<<endl;
 			if(cur->getTime()>=procTime)
 				procTime = cur->getTime();
 			else
@@ -216,12 +223,14 @@ void Process::run(){
 			cur->handleEvent(blist);
 			fout<<cur->toString();
 			//fout<<sendList.top().toString()<<endl;
-				//<<" "<<blist[cur->getBlistIndex()].toString()<<"hs:"<<handQueue.size()<<" is:"<<initQueue.size()
-				//<<endl;
+			//<<" "<<blist[cur->getBlistIndex()].toString()<<"hs:"<<handQueue.size()<<" is:"<<initQueue.size()
+			//<<endl;
 		}
 	}
+	
 	fout<<Event::getResult();
 	cout<<pid<<" finish run"<<endl;
+
 }
 
 void Process::sendMessage(){
@@ -229,21 +238,26 @@ void Process::sendMessage(){
 	if(sendFlag == true && sendList.size()>0){
 		int dest = -1;
 		struct eventStruct e = sendList.top();
-		e.toString();
+		//cout<<e.toString()<<endl;
 		if(e.etype == INIT){
 			sendList.pop();
 			dest = (int)e.bid/baseAmount;
 			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
-		} else if((e.etype == FINI && pid+1<procAmount) || (e.etype == HANDO && (e.time<procTime || prevFini == true))){
-			sendList.pop();
-			dest = pid+1;
-			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
+		} else if((e.etype == FINI && pid+1<procAmount) || (e.etype == HANDO && (e.time<=procTime
+			//||prevFini == true
+			))){
+				sendList.pop();
+				dest = pid+1;
+				MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
 		} else if(e.etype == INITFINI){
 			sendList.pop();
 			dest = e.bid;
 			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
-		} else
-			cout<<"sendMessage,procTime "<<procTime<<" "<<e.toString()<<endl;
+		} else if(e.etype<0)
+			cout<<"sendMessage, etype is "<<e.etype<<endl;
+		else
+			//cout<<"sendMessage,procTime "<<procTime<<" "<<e.toString()<<endl
+			;
 	}
 	MPI_Test(&sendReq, &sendFlag, &stat);
 }
@@ -268,19 +282,8 @@ int Process::recvMessage(){ // rollback should happens here
 		else if(recvElem.etype == INITFINI)
 			return INITFINI;
 		else
-			cout<<"recv something else"<<recvElem.toString()<<endl;
+			cout<<"recv something else from "<<stat.MPI_SOURCE<<" "<<recvElem.toString()<<endl;
 	}
-	//while(handQueue.size()>0 && initQueue.size()>0){
-	//	Event * e1 = handQueue.top();
-	//	Event * e2 = initQueue.top();
-	//	if(e1->getTime()<e2->getTime()){
-	//		queue.push(e1);
-	//		handQueue.pop();
-	//	}else{
-	//		queue.push(e2);
-	//		initQueue.pop();
-	//	}
-	//}
 	return 0;
 }
 
