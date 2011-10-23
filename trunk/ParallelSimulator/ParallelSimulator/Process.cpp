@@ -176,13 +176,16 @@ void Process::run(){
 			e.bid = i;
 			sendList.push(e);
 		}
+		cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
+		while(sendList.size()>0)
+			sendMessage();
 	} else{
 		ret = recvMessage();
 		while(ret!=INITFINI)
 			ret = recvMessage();
 	}
 
-	cout<<handQueue.size()<<" "<<initQueue.size()<<endl;
+	cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
 
 	while(!fini){
 		sendMessage();
@@ -212,6 +215,7 @@ void Process::run(){
 				fout<<"cur->getTime()<procTime"<<cur->getTime()<<" "<<procTime<<endl;
 			cur->handleEvent(blist);
 			fout<<cur->toString();
+			//fout<<sendList.top().toString()<<endl;
 				//<<" "<<blist[cur->getBlistIndex()].toString()<<"hs:"<<handQueue.size()<<" is:"<<initQueue.size()
 				//<<endl;
 		}
@@ -225,18 +229,21 @@ void Process::sendMessage(){
 	if(sendFlag == true && sendList.size()>0){
 		int dest = -1;
 		struct eventStruct e = sendList.top();
-		sendList.pop();
-		if(e.etype == INIT){			
+		e.toString();
+		if(e.etype == INIT){
+			sendList.pop();
 			dest = (int)e.bid/baseAmount;
 			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
-		} else if((e.etype == FINI && pid+1<procAmount) || (e.etype == HANDO && e.time<procTime)){
+		} else if((e.etype == FINI && pid+1<procAmount) || (e.etype == HANDO && (e.time<procTime || prevFini == true))){
+			sendList.pop();
 			dest = pid+1;
 			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
 		} else if(e.etype == INITFINI){
+			sendList.pop();
 			dest = e.bid;
 			MPI_Isend(&e, 1, mpiType, dest, 99, MPI_COMM_WORLD, &sendReq);
-		} else 
-			cout<<"sendMessage "<<e.toString()<<endl;
+		} else
+			cout<<"sendMessage,procTime "<<procTime<<" "<<e.toString()<<endl;
 	}
 	MPI_Test(&sendReq, &sendFlag, &stat);
 }
