@@ -198,7 +198,6 @@ void Process::run(){
 
 	initialize();
 	cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
-
 	
 	while(!fini){
 		sendMessage();
