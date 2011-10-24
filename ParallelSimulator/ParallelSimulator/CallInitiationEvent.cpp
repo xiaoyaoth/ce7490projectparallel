@@ -48,8 +48,7 @@ void CallInitiationEvent::scheme0(Base blist[]){
 			CallTerminationEvent *cte = new CallTerminationEvent(handoverTS, baseId, arrivalNo);
 			cte->print = false;
 			insertIntoEventQueue(cte);
-		}
-		else
+		} else
 			insertIntoEventQueue(new CallTerminationEvent(terminationTS, baseId, arrivalNo));
 	}else
 		Event::block++;
@@ -57,8 +56,8 @@ void CallInitiationEvent::scheme0(Base blist[]){
 }
 
 void CallInitiationEvent::scheme1(Base blist[]){
-	int baseID = getBlistIndex();
-	Base * base = &blist[baseID];
+	int bidx = getBlistIndex();
+	Base *base = &blist[bidx];
 	int oc = base->getOccupiedChannel(); //occupied channel amount
 	bool rco = base->isReservedChannelOccupied();//reservedChannleOccupied
 	int avc; //availabe channel amount
@@ -70,13 +69,20 @@ void CallInitiationEvent::scheme1(Base blist[]){
 		base->incOccupiedChannel();
 		float handoverTS = time + 3600*(DIAMETER-posInBase)/speed;
 		float terminationTS = time + duration;
-		if(handoverTS<terminationTS)
-			if(baseID+1<20)
-				new CallHandoverEvent(handoverTS, speed, baseID+1, terminationTS-handoverTS, arrivalNo, false);
-			else
-				new CallTerminationEvent(handoverTS, baseID, arrivalNo, false);
-		else
-			new CallTerminationEvent(terminationTS, baseID, arrivalNo, false);
+		if(handoverTS<terminationTS){
+			if(baseId+1<20)
+				if(bidx+1<getBlistSize()){
+					CallHandoverEvent *ev = new CallHandoverEvent(handoverTS, 
+						speed, baseId+1, terminationTS-handoverTS, arrivalNo);
+					insertIntoEventQueue(ev);
+				} else
+					insertIntoSendList(toHandoverStruct(arrivalNo, terminationTS-handoverTS,
+					baseId+1, 0, speed, handoverTS));
+			CallTerminationEvent *cte = new CallTerminationEvent(handoverTS, baseId, arrivalNo);
+			cte->print = false;
+			insertIntoEventQueue(cte);
+		}else
+			insertIntoEventQueue(new CallTerminationEvent(terminationTS, baseId, arrivalNo, false));
 	}else
 		Event::block++;
 	return;
