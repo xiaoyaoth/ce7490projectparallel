@@ -95,23 +95,24 @@ int Process::getQueueSize(){
 	return -1;
 }
 
+
 struct eventStruct Process::parseData(string rec){
 	char * cstr, *p;
 	int no, baseID;
 	float time, duration, speed, pos;
 
 	cstr = new char[rec.size()+1];
-	strcpy_s(cstr, rec.size()+1, rec.c_str());
+	strcpy(cstr,rec.c_str());
+	//strcpy_s(cstr, rec.size()+1, rec.c_str());
 
 	p=strtok (cstr,"\t");
 	no = atoi(p);
 	p=strtok(NULL,"\t");
 	time = (float)atof(p);
 	p=strtok(NULL,"\t");
-	baseID = atoi(p) - 1;
-	pos = (float)baseID*2 + 1;
-	p=strtok(NULL,"\t");
 	duration = (float)atof(p);
+	p=strtok(NULL,"\t");
+	pos = atof(p);
 	p=strtok(NULL,"\t");
 	speed = (float)atof(p);
 
@@ -119,7 +120,7 @@ struct eventStruct Process::parseData(string rec){
 	e.etype = 0;
 	e.ano = no;
 	e.dura = duration;
-	e.bid = pos/DIAMETER;
+	e.bid = (int)pos/DIAMETER;
 	e.posInBase = pos-e.bid*DIAMETER;
 	e.rc = 0;
 	e.speed = speed;
@@ -150,7 +151,7 @@ void Process::initialize(){
 			struct eventStruct e;
 			e.etype = INITFINI;
 			e.bid = i;
-			e.time = FLT_MAX;
+			e.time = 1000000;
 			MPI_Send(&e, 1, mpiType, e.bid, 99, MPI_COMM_WORLD);
 		}
 		cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
@@ -227,7 +228,7 @@ void Process::run(){
 		}
 	}
 	
-	fout<<Event::getResult();
+	cout<<Event::getResult();
 	cout<<pid<<" finish run"<<endl;
 
 }
