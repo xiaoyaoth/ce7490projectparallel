@@ -3,16 +3,12 @@
 
 #include "stdio.h"
 #include "stdlib.h"
-#include "limits.h"
-#include <ppl.h>
-#include <random>
 #include <time.h>
 #include <iostream>
 #include <list>
 
 #include "Process.h"
 
-using namespace Concurrency;
 using namespace std;
 
 void initializeEnv(MPI_Datatype &t);
@@ -20,7 +16,8 @@ void test(int rank);
 void test2(int rank, int size);
 void test3(int rank, int size);
 
-void main(int argc, char* argv[]){
+int main(int argc, char* argv[]){
+	clock_t time = clock();
 	int procsAmount, myRank;
 	MPI_Datatype mpiType;
 
@@ -33,10 +30,10 @@ void main(int argc, char* argv[]){
 	//test(myRank);
 	//test2(myRank, procsAmount);
 	//test3(myRank, procsAmount);
-	
-
+	cout<<myRank<<" "<<clock()-time<<endl;
 	MPI_Type_free(&mpiType);
 	MPI_Finalize(); 
+	return 0;
 }
 
 void initializeEnv(MPI_Datatype &t)

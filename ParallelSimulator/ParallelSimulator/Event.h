@@ -20,6 +20,28 @@
 #include <sstream>
 #include "Base.h"
 
+struct eventStruct{
+	/*parameter related MPI*/
+	int etype;//event type, 0 is initial, 1 is handover, 2 is termination
+
+	/*parameter related logic*/
+	int ano;
+	int rc;
+	int bid;
+	float time;
+	float speed;
+	float dura;
+	float posInBase;
+
+	string toString(){
+		stringstream ss;
+		ss<<"type:"<<etype<<"\tano:"<<ano<<"\tdura:"<<dura
+			<<"\tbid:"<<bid<<"\tposInBase:"<<posInBase<<"\trc:"
+			<<rc<<"\tspeed:"<<speed<<"\ttime:"<<time<<endl;
+		return ss.str();
+	}
+};
+
 class Event{
 
 protected:
@@ -55,31 +77,8 @@ public:
 	int getBlistIndex();
 	int getBlistSize();
 
-	struct eventStruct Event::toInitiationStruct(int ano, float dura, float pos, float speed, float time);
-	struct eventStruct Event::toHandoverStruct(int ano, float dura, int bid, bool rc, float speed, float time);
-	struct eventStruct Event::toTerminationStruct(int ano, int bid, bool rc, float time);	
+	struct eventStruct toInitiationStruct(int ano, float dura, float pos, float speed, float time);
+	struct eventStruct toHandoverStruct(int ano, float dura, int bid, bool rc, float speed, float time);
+	struct eventStruct toTerminationStruct(int ano, int bid, bool rc, float time);	
 };
-
-struct eventStruct{
-	/*parameter related MPI*/
-	int etype;//event type, 0 is initial, 1 is handover, 2 is termination
-
-	/*parameter related logic*/
-	int ano;
-	int rc;
-	int bid;
-	float time;
-	float speed;
-	float dura;
-	float posInBase;
-
-	string toString(){
-		stringstream ss;
-		ss<<"type:"<<etype<<"\tano:"<<ano<<"\tdura:"<<dura
-			<<"\tbid:"<<bid<<"\tposInBase:"<<posInBase<<"\trc:"
-			<<rc<<"\tspeed:"<<speed<<"\ttime:"<<time<<endl;
-		return ss.str();
-	}
-};
-
 #endif
