@@ -43,7 +43,7 @@ private:
 	static bool prevFini;
 
 	/*io*/
-	ofstream fout;
+//	ofstream fout;
 
 public:
 	/*initiation*/

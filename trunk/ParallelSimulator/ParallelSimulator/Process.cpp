@@ -43,9 +43,9 @@ Process::Process(int pno, int rank, MPI_Datatype t){
 	procTime = 0;
 
 	/*io*/
-	stringstream ss;
-	ss<<pid<<".txt";
-	fout.open(ss.str().c_str());
+	//stringstream ss;
+	//ss<<pid<<".txt";
+	//fout.open(ss.str().c_str());
 }
 
 void Process::insert(Event * e){
@@ -177,7 +177,7 @@ void Process::initialize(){
 	ifstream fin;
 	MPI_Status stat;
 	if(pid == 0){
-		fin.open("data.txt.10w");
+		fin.open("data.txt.100w");
 		if(!fin)
 			cout<<"file not exist"<<endl;
 		while(!fin.eof()){
@@ -236,7 +236,7 @@ void Process::handle(){
 		else
 			cout<<"cur->getTime()<procTime "<<cur->toString()<<"\t"<<procTime<<endl;
 		cur->handleEvent(blist);
-		fout<<cur->toString();
+		//fout<<cur->toString()<<endl;
 	}
 }
 
