@@ -95,7 +95,6 @@ int Process::getQueueSize(){
 	return -1;
 }
 
-
 struct eventStruct Process::parseData(string rec){
 	char * cstr, *p;
 	int no, baseID;
@@ -222,9 +221,8 @@ void Process::run(){
 				fout<<"cur->getTime()<procTime"<<cur->getTime()<<" "<<procTime<<endl;
 			cur->handleEvent(blist);
 			fout<<cur->toString();
-			//fout<<sendList.top().toString()<<endl;
-			//<<" "<<blist[cur->getBlistIndex()].toString()<<"hs:"<<handQueue.size()<<" is:"<<initQueue.size()
-			//<<endl;
+			if(strcmp(cur->toString().c_str(), "") == true)
+				fout<<" "<<blist[cur->getBlistIndex()].toString()<<endl;
 		}
 	}
 	

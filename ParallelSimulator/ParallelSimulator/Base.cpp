@@ -20,7 +20,6 @@ void Base::setBaseID(int bid){
 	baseID = bid;
 }
 
-
 int Base::getOccupiedChannel(){
 	return occupiedChannel;
 }
@@ -55,6 +54,6 @@ bool Base::isReservedChannelOccupied(){
 string Base::toString(){
 	stringstream ss;
 	//if(10 == baseID)
-	ss<<baseID<<"_"<<occupiedChannel<<"_"<<reservedChannelOccupied<<" || ";
+	ss<<baseID<<"_"<<occupiedChannel<<"_"<<reservedChannelOccupied;
 	return ss.str();
 }

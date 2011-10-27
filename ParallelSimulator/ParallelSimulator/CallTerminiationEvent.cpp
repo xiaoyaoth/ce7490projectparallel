@@ -57,7 +57,7 @@ string CallTerminationEvent::toString(){
 
 	if(print)
 		ss<<"t "<<prevCallReserved<<"\t"<<time
-		<<"\t"<<arrivalNo<<endl;
+		<<"\t"<<arrivalNo;
 	else
 		ss<<"";
 
