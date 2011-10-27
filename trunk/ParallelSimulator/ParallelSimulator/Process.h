@@ -6,6 +6,7 @@
 #include "Event.h"
 #include <queue>
 #include <list>
+#include <fstream>
 
 struct comp{
 	bool operator() (Event *e1, Event *e2){
@@ -22,7 +23,7 @@ struct comp2{
 class Process{
 private:
 	/*logic*/
-	Base * blist;	
+	Base * blist;
 
 	/*MPI*/
 	static int baseAmount; // base amount in every process
@@ -41,6 +42,9 @@ private:
 	static float procTime;
 	static bool prevFini;
 
+	/*io*/
+	ofstream fout;
+
 public:
 	/*initiation*/
 	Process(int procAmount, int myRank, MPI_Datatype t);
@@ -54,6 +58,7 @@ public:
 	void run();
 	struct eventStruct parseData(string rec);
 	void initialize();
+	void handle();
 
 	/*MPI operation*/
 	void sendMessage();

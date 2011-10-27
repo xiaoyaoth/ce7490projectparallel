@@ -4,8 +4,7 @@
 #include "CallTerminationEvent.h"
 #include <string>
 #include <iostream>
-#include <fstream>
-
+#include <sstream>
 
 #define FREQ 100 // state saving freqency
 
@@ -42,6 +41,11 @@ Process::Process(int pno, int rank, MPI_Datatype t){
 		cout<<blist[i].getBaseID()<<endl;
 	}
 	procTime = 0;
+
+	/*io*/
+	stringstream ss;
+	ss<<pid<<".txt";
+	fout.open(ss.str().c_str());
 }
 
 void Process::insert(Event * e){
@@ -95,7 +99,7 @@ int Process::getQueueSize(){
 	return -1;
 }
 
-struct eventStruct Process::parseData(string rec){
+struct eventStruct parseStocha(string rec){
 	char * cstr, *p;
 	int no, baseID;
 	float time, duration, speed, pos;
@@ -127,12 +131,53 @@ struct eventStruct Process::parseData(string rec){
 	return e;
 }
 
+struct eventStruct parseDeterm(string rec){
+	char * cstr, *p;
+	int no, baseID;
+	float time, duration, speed, pos;
+
+	cstr = new char[rec.size()+1];
+	strcpy_s(cstr, rec.size()+1, rec.c_str());
+
+	p=strtok (cstr,"\t");
+	no = atoi(p);
+	p=strtok(NULL,"\t");
+	time = (float)atof(p);
+	p=strtok(NULL,"\t");
+	baseID = atoi(p) - 1;
+	pos = (float)baseID*2 + 1;
+	p=strtok(NULL,"\t");
+	duration = (float)atof(p);
+	p=strtok(NULL,"\t");
+	speed = (float)atof(p);
+
+	struct eventStruct e;
+	e.etype = 0;
+	e.ano = no;
+	e.dura = duration;
+	e.bid = pos/DIAMETER;
+	e.posInBase = pos-e.bid*DIAMETER;
+	e.rc = 0;
+	e.speed = speed;
+	e.time = time;
+
+	return e;
+}
+
+struct eventStruct Process::parseData(string rec){
+	bool determine = false;
+	if(determine)
+		return parseDeterm(rec);
+	else
+		return parseStocha(rec);
+}
+
 void Process::initialize(){
 	string rec; //one record
 	ifstream fin;
 	MPI_Status stat;
 	if(pid == 0){
-		fin.open("data.txt");
+		fin.open("data.txt.10w");
 		if(!fin)
 			cout<<"file not exist"<<endl;
 		while(!fin.eof()){
@@ -152,7 +197,6 @@ void Process::initialize(){
 			e.time = 1000000;
 			MPI_Send(&e, 1, mpiType, e.bid, 99, MPI_COMM_WORLD);
 		}
-		cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
 	} else{
 		while(true){
 			struct eventStruct e;
@@ -184,19 +228,29 @@ void Process::insertSendList(struct eventStruct e){
 	sendList.push(e);
 }
 
-void Process::run(){
+void Process::handle(){
+	Event * cur = getNextEvent();
+	if(cur != NULL){
+		if(cur->getTime()>=procTime)
+			procTime = cur->getTime();
+		else
+			cout<<"cur->getTime()<procTime "<<cur->toString()<<"\t"<<procTime<<endl;
+		cur->handleEvent(blist);
+		fout<<cur->toString();
+	}
+}
 
+void Process::run(){
 	int j = 0;
 	int i = 0;
 	int ret = -1;
 	bool fini = false; //current process fini
 
 	initialize();
-	cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
-	
+
 	while(!fini){
 		if(sendList.size()>0)
-		sendMessage();
+			sendMessage();
 		if(pid != 0 && prevFini != true)
 			ret = recvMessage();
 		if(prevFini == true && sendList.size() == 0
@@ -210,14 +264,7 @@ void Process::run(){
 					sendMessage();
 				break; // no event anymore, execution finished;
 		}
-		Event * cur = getNextEvent();
-		if(cur != NULL){
-			if(cur->getTime()>=procTime)
-				procTime = cur->getTime();
-			else
-				cout<<"cur->getTime()<procTime"<<cur->getTime()<<" "<<procTime<<endl;
-			cur->handleEvent(blist);
-		}
+		handle();
 	}	
 	cout<<Event::getResult();
 	cout<<pid<<" finish run"<<endl;
@@ -252,16 +299,7 @@ void Process::sendMessage(){
 	}
 	MPI_Test(&sendReq, &sendFlag, &stat);
 	while(sendFlag != true){
-		Event * cur = getNextEvent();
-		if(cur != NULL){
-			if(cur->getTime()>=procTime)
-				procTime = cur->getTime();
-			else
-				cout<<"cur->getTime()<procTime"<<cur->getTime()<<" "<<procTime<<endl;
-			cur->handleEvent(blist);
-			//cout<<cur->toString()<<endl;
-		} else
-			cout<<cur;
+		handle();
 		MPI_Test(&sendReq, &sendFlag, &stat);
 	}
 }
@@ -274,14 +312,7 @@ int Process::recvMessage(){ // rollback should happens here
 	}
 	MPI_Test(&recvReq, &recvFlag, &stat);
 	while(recvFlag != true){
-		Event * cur = getNextEvent();
-		if(cur != NULL){
-			if(cur->getTime()>=procTime)
-				procTime = cur->getTime();
-			else
-				cout<<"cur->getTime()<procTime"<<cur->getTime()<<" "<<procTime<<endl;
-			cur->handleEvent(blist);
-		}
+		handle();
 		MPI_Test(&recvReq, &recvFlag, &stat);
 		//cout<<recvElem.toString()<<endl;
 	}

@@ -55,11 +55,11 @@ string CallTerminationEvent::toString(){
 	stringstream ss;
 	//ss<<"ano:"<<arrivalNo<<"T\ermi\t\t"<<time<<"\t"<<baseId;
 
-	if(print)
+	//if(print)
 		ss<<"t "<<prevCallReserved<<"\t"<<time
 		<<"\t"<<arrivalNo;
-	else
-		ss<<"";
+	//else
+	///	ss<<"";
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();
