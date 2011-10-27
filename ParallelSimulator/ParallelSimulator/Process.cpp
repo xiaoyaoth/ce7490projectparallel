@@ -39,7 +39,6 @@ Process::Process(int pno, int rank, MPI_Datatype t){
 			blist[i].setBaseID(bid);
 		else
 			blist[i].setBaseID(-1);
-		cout<<blist[i].getBaseID()<<endl;
 	}
 	procTime = 0;
 }
@@ -153,7 +152,6 @@ void Process::initialize(){
 			e.time = 1000000;
 			MPI_Send(&e, 1, mpiType, e.bid, 99, MPI_COMM_WORLD);
 		}
-		cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
 	} else{
 		while(true){
 			struct eventStruct e;
@@ -163,9 +161,9 @@ void Process::initialize(){
 			else if(e.etype == INITFINI)
 				break;
 			else
-				cout<<"initialize wrong"<<e.toString();
+				cout<<"initialize wrong";
 		}
-		cout<<"init recv fini"<<endl;
+		cout<<pid<<" init recv fini"<<endl;
 	}
 }
 
@@ -187,17 +185,12 @@ void Process::insertSendList(struct eventStruct e){
 
 void Process::run(){
 
-	stringstream ss;
-	ss<<pid<<".txt";
-	ofstream fout(ss.str().c_str());
-
 	int j = 0;
 	int i = 0;
 	int ret = -1;
 	bool fini = false; //current process fini
 
 	initialize();
-	cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
 	
 	while(!fini){
 		sendMessage();
@@ -218,15 +211,12 @@ void Process::run(){
 			if(cur->getTime()>=procTime)
 				procTime = cur->getTime();
 			else
-				fout<<"cur->getTime()<procTime"<<cur->getTime()<<" "<<procTime<<endl;
+				cout<<"cur->getTime()<procTime"<<cur->getTime()<<" "<<procTime<<endl;
 			cur->handleEvent(blist);
-			fout<<cur->toString();
-			if(strcmp(cur->toString().c_str(), "") == true)
-				fout<<" "<<blist[cur->getBlistIndex()].toString()<<endl;
 		}
 	}
 	
-	cout<<Event::getResult();
+	Event::getResult();
 	cout<<pid<<" finish run"<<endl;
 
 }
@@ -280,7 +270,7 @@ int Process::recvMessage(){ // rollback should happens here
 		else if(recvElem.etype == INITFINI)
 			return INITFINI;
 		else
-			cout<<"recv something else from "<<stat.MPI_SOURCE<<" "<<recvElem.toString()<<endl;
+			cout<<"recv something else from "<<stat.MPI_SOURCE<<endl;
 	}
 	return 0;
 }

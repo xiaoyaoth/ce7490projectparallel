@@ -28,17 +28,9 @@ void Event::handleEvent(Base blist[]){
 	std::cout<<"general func of handling event"<<std::endl;
 }
 
-string Event::toString(){
-	stringstream ss;
-	ss<<"vitual"<<"\t"<<time<<"\t"<<std::endl;
-	return ss.str();
-}
-
-string Event::getResult(){
-	stringstream ss;
-	ss<<"success\tdrop\tblock\t"<<endl;
-	ss<<Event::success<<"\t"<<Event::drop<<"\t"<<Event::block<<endl;
-	return ss.str();
+void Event::getResult(){
+	cout<<"success\tdrop\tblock\t"<<endl;
+	cout<<Event::success<<"\t"<<Event::drop<<"\t"<<Event::block<<endl;
 }
 
 /*MPI*/

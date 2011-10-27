@@ -99,16 +99,3 @@ void CallHandoverEvent::scheme1(Base * blist){
 		Event::drop++;
 	return;
 }
-
-string CallHandoverEvent::toString(){
-	stringstream ss;
-
-	//ss<<"ano:"<<arrivalNo<<"\tHando\t\t"<<time
-	//	<<"\t"<<baseId<<"\t"<<speed<<"\t"<<duration;
-
-	ss<<"h "<<this->prevCallReserved<<"\t"<<time
-		<<"\t"<<arrivalNo;
-
-	//ss<<arrivalNo<<"\t"<<time<<endl;
-	return ss.str();
-}

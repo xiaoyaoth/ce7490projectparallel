@@ -17,7 +17,6 @@
 #define INTNO 4
 #define FLOATNO 4
 
-#include <sstream>
 #include "Base.h"
 
 struct eventStruct{
@@ -32,14 +31,6 @@ struct eventStruct{
 	float speed;
 	float dura;
 	float posInBase;
-
-	string toString(){
-		stringstream ss;
-		ss<<"type:"<<etype<<"\tano:"<<ano<<"\tdura:"<<dura
-			<<"\tbid:"<<bid<<"\tposInBase:"<<posInBase<<"\trc:"
-			<<rc<<"\tspeed:"<<speed<<"\ttime:"<<time<<endl;
-		return ss.str();
-	}
 };
 
 class Event{
@@ -68,8 +59,7 @@ public:
 	int getArrivalNo();
 
 	virtual void handleEvent(Base blist[]);
-	virtual string toString();
-	static string getResult();
+	static void getResult();
 
 	/*MPI*/
 	void insertIntoEventQueue(Event * e);

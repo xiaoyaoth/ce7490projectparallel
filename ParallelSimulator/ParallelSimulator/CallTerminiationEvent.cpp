@@ -50,17 +50,3 @@ void CallTerminationEvent::scheme1(Base blist[]){
 	Event::success++;
 	return;
 }
-
-string CallTerminationEvent::toString(){
-	stringstream ss;
-	//ss<<"ano:"<<arrivalNo<<"T\ermi\t\t"<<time<<"\t"<<baseId;
-
-	if(print)
-		ss<<"t "<<prevCallReserved<<"\t"<<time
-		<<"\t"<<arrivalNo;
-	else
-		ss<<"";
-
-	//ss<<arrivalNo<<"\t"<<time<<endl;
-	return ss.str();
-}
