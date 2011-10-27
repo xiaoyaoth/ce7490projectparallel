@@ -50,3 +50,10 @@ void Base::toggleReservation(){
 bool Base::isReservedChannelOccupied(){
 	return reservedChannelOccupied;
 }
+
+string Base::toString(){
+	stringstream ss;
+	//if(10 == baseID)
+	ss<<baseID<<"_"<<occupiedChannel<<"_"<<reservedChannelOccupied;
+	return ss.str();
+}

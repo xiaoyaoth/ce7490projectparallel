@@ -27,9 +27,6 @@ int main(int argc, char* argv[]){
 	initializeEnv(mpiType);
 
 	Process p(procsAmount, myRank, mpiType); p.run();
-	//test(myRank);
-	//test2(myRank, procsAmount);
-	//test3(myRank, procsAmount);
 	cout<<myRank<<" "<<clock()-time<<endl;
 	MPI_Type_free(&mpiType);
 	MPI_Finalize(); 

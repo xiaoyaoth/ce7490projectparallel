@@ -39,6 +39,7 @@ Process::Process(int pno, int rank, MPI_Datatype t){
 			blist[i].setBaseID(bid);
 		else
 			blist[i].setBaseID(-1);
+		cout<<blist[i].getBaseID()<<endl;
 	}
 	procTime = 0;
 }
@@ -101,7 +102,6 @@ struct eventStruct Process::parseData(string rec){
 
 	cstr = new char[rec.size()+1];
 	strcpy(cstr,rec.c_str());
-	//strcpy_s(cstr, rec.size()+1, rec.c_str());
 
 	p=strtok (cstr,"\t");
 	no = atoi(p);
@@ -132,7 +132,7 @@ void Process::initialize(){
 	ifstream fin;
 	MPI_Status stat;
 	if(pid == 0){
-		fin.open("C:\\Users\\xli15\\Documents\\Visual Studio 2010\\Projects\\ParallelSimulator\\ParallelSimulator\\data.txt");
+		fin.open("data.txt");
 		if(!fin)
 			cout<<"file not exist"<<endl;
 		while(!fin.eof()){
@@ -152,6 +152,7 @@ void Process::initialize(){
 			e.time = 1000000;
 			MPI_Send(&e, 1, mpiType, e.bid, 99, MPI_COMM_WORLD);
 		}
+		cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
 	} else{
 		while(true){
 			struct eventStruct e;
@@ -161,9 +162,9 @@ void Process::initialize(){
 			else if(e.etype == INITFINI)
 				break;
 			else
-				cout<<"initialize wrong";
+				cout<<"initialize wrong"<<e.toString();
 		}
-		cout<<pid<<" init recv fini"<<endl;
+		cout<<"init recv fini"<<endl;
 	}
 }
 
@@ -191,16 +192,19 @@ void Process::run(){
 	bool fini = false; //current process fini
 
 	initialize();
+	cout<<handQueue.size()<<" "<<initQueue.size()<<" "<<sendList.size()<<endl;
 	
 	while(!fini){
+		if(sendList.size()>0)
 		sendMessage();
-		if(pid != 0)
+		if(pid != 0 && prevFini != true)
 			ret = recvMessage();
 		if(prevFini == true && sendList.size() == 0
 			&& initQueue.size() == 0 && handQueue.size() == 0){
 				struct eventStruct e;
 				fini = true;
-				e.etype = FINI;
+				e.etype = FINI; e.ano = -1; e.dura = -1; e.bid = -1; e.posInBase = -1;
+				e.rc = -1; e.speed = -1; e.time = -1;
 				sendList.push(e);
 				if(pid != procAmount -1)
 					sendMessage();
@@ -214,9 +218,8 @@ void Process::run(){
 				cout<<"cur->getTime()<procTime"<<cur->getTime()<<" "<<procTime<<endl;
 			cur->handleEvent(blist);
 		}
-	}
-	
-	Event::getResult();
+	}	
+	cout<<Event::getResult();
 	cout<<pid<<" finish run"<<endl;
 
 }
@@ -248,6 +251,19 @@ void Process::sendMessage(){
 			;
 	}
 	MPI_Test(&sendReq, &sendFlag, &stat);
+	while(sendFlag != true){
+		Event * cur = getNextEvent();
+		if(cur != NULL){
+			if(cur->getTime()>=procTime)
+				procTime = cur->getTime();
+			else
+				cout<<"cur->getTime()<procTime"<<cur->getTime()<<" "<<procTime<<endl;
+			cur->handleEvent(blist);
+			//cout<<cur->toString()<<endl;
+		} else
+			cout<<cur;
+		MPI_Test(&sendReq, &sendFlag, &stat);
+	}
 }
 
 int Process::recvMessage(){ // rollback should happens here
@@ -257,6 +273,19 @@ int Process::recvMessage(){ // rollback should happens here
 		MPI_Irecv(&recvElem, 1, mpiType, MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &recvReq);
 	}
 	MPI_Test(&recvReq, &recvFlag, &stat);
+	while(recvFlag != true){
+		Event * cur = getNextEvent();
+		if(cur != NULL){
+			if(cur->getTime()>=procTime)
+				procTime = cur->getTime();
+			else
+				cout<<"cur->getTime()<procTime"<<cur->getTime()<<" "<<procTime<<endl;
+			cur->handleEvent(blist);
+		}
+		MPI_Test(&recvReq, &recvFlag, &stat);
+		//cout<<recvElem.toString()<<endl;
+	}
+	//cout<<recvFlag;
 	if(recvFlag == true){
 		//cout<<recvElem.toString()<<endl;
 		if(recvElem.etype == FINI)
@@ -270,7 +299,7 @@ int Process::recvMessage(){ // rollback should happens here
 		else if(recvElem.etype == INITFINI)
 			return INITFINI;
 		else
-			cout<<"recv something else from "<<stat.MPI_SOURCE<<endl;
+			cout<<"recv something else from "<<stat.MPI_SOURCE<<" "<<recvElem.toString()<<endl;
 	}
 	return 0;
 }

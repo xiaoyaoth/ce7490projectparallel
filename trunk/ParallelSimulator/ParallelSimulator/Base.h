@@ -4,6 +4,9 @@
 #ifndef BASENO
 #define BASENO 20
 #endif
+
+#include <string>
+#include <sstream>
 #include <list>
 
 using namespace std;//omit this may cause TOSTRING function erronous
@@ -12,6 +15,12 @@ struct baseState{
 	float time;
 	bool rco;
 	int oc;
+	
+	string toString(){
+		stringstream ss;
+		ss<<time<<"_"<<oc<<"_"<<rco<<" || ";
+		return ss.str();
+	}
 };
 
 class Base{
@@ -35,6 +44,9 @@ public:
 	bool isReservedChannelOccupied();
 
 	void saveState(float t);
+	
+	string printStateList();
+	string toString();
 };
 #endif
 
