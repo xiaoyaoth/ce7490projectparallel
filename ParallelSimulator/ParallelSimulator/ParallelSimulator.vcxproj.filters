@@ -16,10 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
-    <None Include="..\Debug\xli15\ParallelSimulator\0.txt" />
-    <None Include="..\Debug\xli15\ParallelSimulator\1.txt" />
-    <None Include="..\Debug\xli15\ParallelSimulator\2.txt" />
-    <None Include="..\Debug\xli15\ParallelSimulator\3.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
