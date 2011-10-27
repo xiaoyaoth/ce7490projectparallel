@@ -95,7 +95,7 @@ string CallInitiationEvent::toString(){
 	//	<<baseId<<"\t"<<speed<<"\t"<<duration<<"\t"<<posInBase;
 
 	ss<<"i"<<"\t"<<time
-	<<"\t"<<arrivalNo<<endl;
+	<<"\t"<<arrivalNo;
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();

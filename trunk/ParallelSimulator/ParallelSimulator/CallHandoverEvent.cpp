@@ -9,7 +9,6 @@ CallHandoverEvent::CallHandoverEvent(float t, float s, int bid, float d, int ano
 	prevCallReserved = false;
 }
 
-
 CallHandoverEvent::CallHandoverEvent(float t, float s, int bid, float d, int ano, bool rc)
 	:Event(t, bid, ano)
 {
@@ -25,7 +24,6 @@ CallHandoverEvent::CallHandoverEvent(struct eventStruct e)
 	duration = e.dura;
 	prevCallReserved = (bool)e.rc;
 }
-
 
 void CallHandoverEvent::handleEvent(Base blist[]){
 	if(SCHEME == 0)
@@ -109,7 +107,7 @@ string CallHandoverEvent::toString(){
 	//	<<"\t"<<baseId<<"\t"<<speed<<"\t"<<duration;
 
 	ss<<"h "<<this->prevCallReserved<<"\t"<<time
-		<<"\t"<<arrivalNo<<endl;
+		<<"\t"<<arrivalNo;
 
 	//ss<<arrivalNo<<"\t"<<time<<endl;
 	return ss.str();
